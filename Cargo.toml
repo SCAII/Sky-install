@@ -8,8 +8,5 @@ authors = ["Jed Irvine <jedirv@gmail.com>"]
 zip = "0.3.0"
 curl = "0.4.8"
 
-[target."macos".dependencies]
-git2 = "0.6.11"
-
-[target."linux".dependencies]
+[target.'cfg(any(unix, macos))'.dependencies]
 git2 = "0.6.11"
