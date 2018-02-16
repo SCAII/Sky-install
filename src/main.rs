@@ -50,8 +50,8 @@ fn usage() {
     println!("  sky-install get-sky-rts [branch]   // pull default RTS");
     println!("  sky-install build-core             // build/configure core");
     println!("  sky-install build-sky-rts          // build/configure default RTS");
-    println!("  sky-install clean-core-all         // remove core pull and build arifacts");
-    println!("  sky-install clean-core-build       // remove core build arifacts");
+    println!("  sky-install clean-core-all         // remove core pull and build artifacts");
+    println!("  sky-install clean-core-build       // remove core build artifacts");
     println!("  sky-install clean-sky-rts-all      // remove RTS pull and build artifacts");
     println!("  sky-install clean-sky-rts-build    // remove RTS build artifacts");
     println!("  sky-install full-install [branch]  // pull/build/configure all");
