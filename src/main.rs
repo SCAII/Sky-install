@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use std::fs;
 #[cfg(any(target_os="linux", target_os="macos"))]
 use git2::Repository;
+use std::process::Output;
 
 
 //  install into .scaii/git by default
@@ -171,15 +172,16 @@ fn try_clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
 }
 
 fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
-    println!("Cleaning any core files present...");
+    println!("");
+    println!("");
+    println!("Cleaning core...");
+    println!("");
     let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if scaii_dir.as_path().exists() {
         remove_tree(&scaii_dir)?;
     }
     
-    println!("Looking for core build artifacts to clean...");
-
     //rm ~/.scaii/bin/scaii.core
     let mut scaii_core_path = get_dot_scaii_dir()?;
     scaii_core_path.push("bin");
@@ -216,7 +218,10 @@ fn try_clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 fn clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
-    println!("Cleaning any sky-rts files present...");
+    println!("");
+    println!("");
+    println!("Cleaning Sky-RTS...");
+    println!("");
     let mut rts_dir = install_dir.clone();
     rts_dir.push("Sky-RTS".to_string());
     if rts_dir.as_path().exists() {
@@ -263,7 +268,12 @@ fn get_default_install_dir() -> Result<PathBuf, Box<Error>> {
 //  not being found)
 #[cfg(target_os="windows")]
 fn get_core(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("installing core...");
+    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
+    println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let command : String = "git".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -274,6 +284,7 @@ fn get_core(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error
     let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
+        println!("...cd {:?}", scaii_dir);
         env::set_current_dir(scaii_dir.as_path())?;
         checkout(&command_args.arg_branch_name)?;
     }
@@ -292,7 +303,12 @@ fn verify_git_clone_success(result_string : &String) -> Result<(), Box<Error>>  
 
 #[cfg(any(target_os="linux", target_os="macos"))]
 fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>>{
+    println!("");
+    println!("");
+    println!("installing core...");
+    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
+    println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let url = "https://github.com/SCAII/SCAII.git";
     let repo = match Repository::clone(url, shared_parent.to_str()) {
@@ -302,6 +318,7 @@ fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<E
     let scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
+        println!("...cd {:?}", scaii_dir);
         env::set_current_dir(scaii_dir.as_path())?;
         checkout(&command_args.arg_branch_name)?;
     }
@@ -313,7 +330,12 @@ fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<E
 
 #[cfg(target_os="windows")]
 fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>>{
+    println!("");
+    println!("");
+    println!("installing Sky-RTS...");
+    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
+    println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let command : String = "git".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -324,6 +346,7 @@ fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Er
     if command_args.flag_branch {
         let mut sky_rts_dir = install_dir.clone();
         sky_rts_dir.push("Sky-RTS".to_string());
+        println!("...cd {:?}", sky_rts_dir);
         env::set_current_dir(sky_rts_dir.as_path())?;
         checkout(&command_args.arg_branch_name)?;
     }
@@ -333,7 +356,12 @@ fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Er
 
 #[cfg(any(target_os="linux", target_os="macos"))]
 fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>>{
+    println!("");
+    println!("");
+    println!("installing Sky-RTS...");
+    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
+    println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let url = "https://github.com/SCAII/Sky-RTS.git";
     let repo = match Repository::clone(url, install_dir.to_str()) {
@@ -342,6 +370,7 @@ fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Er
     };
     if command_args.flag_branch {
         install_dir.push("Sky-RTS".to_string());
+        println!("...cd {:?}", install_dir);
         env::set_current_dir(install_dir.as_path())?;
         checkout(&command_args.arg_branch_name)?;
     }
@@ -365,6 +394,10 @@ fn checkout(branch : &String) -> Result<(), Box<Error>> {
 }
 
 fn build_core(install_dir : &PathBuf) -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("building core...");
+    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
     //cd SCAII/
     let mut scaii_install_dir = install_dir.clone();
@@ -372,6 +405,7 @@ fn build_core(install_dir : &PathBuf) -> Result<(), Box<Error>> {
     if !scaii_install_dir.as_path().exists(){
         return Err(Box::new(InstallError::new("scaii core has not been installed - run 'get-core' command first.")));
     }
+    println!("...cd {:?}", scaii_install_dir);
     env::set_current_dir(scaii_install_dir.as_path())?;
     
     //cargo build --release
@@ -402,7 +436,8 @@ fn build_core(install_dir : &PathBuf) -> Result<(), Box<Error>> {
     //cp -r glue ~/.scaii/
     let mut source = scaii_install_dir.clone();
     source.push("glue".to_string());
-    let dest = get_dot_scaii_dir()?;
+    let mut dest = get_dot_scaii_dir()?;
+    dest.push("glue".to_string());
     copy_recursive(&source, &dest)?;
     env::set_current_dir(orig_dir_pathbuf.as_path())?;
     Ok(())
@@ -476,6 +511,10 @@ fn get_home_dir() -> Result<PathBuf, Box<Error>> {
 }
 
 fn build_sky_rts(_install_dir : &PathBuf) -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("building sky-rts...");
+    println!("");
     let mut sky_rts_dir = get_default_install_dir()?;
     sky_rts_dir.push("Sky-RTS");
     if !sky_rts_dir.as_path().exists(){
@@ -517,6 +556,7 @@ fn build_sky_rts(_install_dir : &PathBuf) -> Result<(), Box<Error>> {
     // cd backend/
     let mut backend = sky_rts_dir.clone();
     backend.push("backend".to_string());
+    println!("...cd {:?}", backend);
     env::set_current_dir(backend.as_path())?;
     
     //cargo build --release
@@ -572,6 +612,7 @@ fn build_sky_rts(_install_dir : &PathBuf) -> Result<(), Box<Error>> {
 
 #[cfg(target_os="windows")]
 fn copy_recursive(source : &PathBuf, dest: &PathBuf) -> Result<(), Box<Error>> {
+    println!("...copying files from {:?} to {:?}", source, dest);
     let command : String = "xcopy".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push(source.as_path().to_str().unwrap().to_string());
@@ -608,7 +649,7 @@ fn ensure_google_closure_lib_installed(scaii_root : &PathBuf) ->  Result<(), Box
         Ok(())
     }
     else {
-        println!("google closure library is not installed - will try to install it.");
+        println!("...installing google closure library");
         let mut closure_install_dir = scaii_root.clone();
         closure_install_dir.push("viz");
         closure_install_dir.push("js");
@@ -632,6 +673,7 @@ fn ensure_google_closure_lib_installed(scaii_root : &PathBuf) ->  Result<(), Box
 }
 
 fn install_google_closure_library(mut closure_install_dir : PathBuf, url : String, filename : String, orig_unzipped_dir_name: String) -> Result<PathBuf, Box<Error>> {
+    println!("...cd {:?}", closure_install_dir);
     env::set_current_dir(&closure_install_dir)?;
     let mut closure_zip_path: PathBuf = closure_install_dir.clone();
     closure_zip_path.push(filename);
@@ -678,11 +720,12 @@ fn install_google_closure_library(mut closure_install_dir : PathBuf, url : Strin
 }
 
 fn install_protobuf_javascript_lib(install_dir :&PathBuf)  ->  Result<(), Box<Error>> {
-    println!("Installing google protobuf javascript library...");
+    println!("...installing google protobuf javascript library...");
     let orig_dir_pathbuf = env::current_dir()?;
     let mut js_dir = install_dir.clone();
     js_dir.push("viz".to_string());
     js_dir.push("js".to_string());
+    println!("...cd {:?}", js_dir);
     env::set_current_dir(js_dir.as_path())?;
     let command : String = "git".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -746,7 +789,6 @@ fn set_execute_permission(path_buf : &PathBuf) -> Result<(),Box<Error>>{
         args.push(String::from("744"));
         args.push(String::from(path_buf.as_path().to_str().unwrap()));
         let result_string = run_command(&command, args)?;
-        let _empty_string = String::from("");
         match result_string.as_str() {
             "" => Ok(()),
             ref x => Err(Box::new(InstallError::new(&format!("couldnot set execute permission on {:?} : {}", path_buf, x ))))
@@ -779,6 +821,18 @@ fn unzip_file(parent : &PathBuf, zip_file : fs::File) -> Result<(), Box<Error>> 
     Ok(())
 }
 
+
+fn emit_output(output : &Output) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if stdout != "" {
+        println!("   ...stdout: {}", stdout);
+    }
+    if stderr != "" {
+        println!("   ...stderr: {}", stderr);
+    }
+}
+
 #[cfg(target_os="windows")]
 fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, Box<Error>> {
     let mut c = Command::new("cmd");
@@ -791,6 +845,7 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
     let output = c.output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
+    emit_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result{
@@ -815,6 +870,7 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
     let output = c.output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
+    emit_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result{
@@ -843,6 +899,8 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
     let output = c.output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
+
+    emit_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result{
