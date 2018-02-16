@@ -52,6 +52,7 @@ fn usage() {
     println!("  sky-install clean-core             // remove core and arifacts");
     println!("  sky-install clean-sky-rts          // remove default RTS and artifacts");
     println!("  sky-install full-install [branch]  // pull/build/configure all");
+    println!("  sky-install full-clean             // pull/build/configure all");
     println!("");
     println!("via cargo...");
     println!("  cargo build -- <command> [branch]");
@@ -87,11 +88,11 @@ fn try_command(command : &String, args : Args) -> Result<(), Box<Error>> {
     let install_dir = get_default_install_dir()?;
     match command.as_ref() {
         "get-core" => {
-            clean_core(&install_dir)?;
+            try_clean_core(&install_dir)?;
             get_core(&install_dir, &args)
         },
         "get-sky-rts" => { 
-            clean_sky_rts(&install_dir)?;
+            try_clean_sky_rts(&install_dir)?;
             get_sky_rts(&install_dir, &args)
         },
         "build-core" => { build_core(&install_dir) },
@@ -99,12 +100,17 @@ fn try_command(command : &String, args : Args) -> Result<(), Box<Error>> {
         "clean-core" => { clean_core(&install_dir) },
         "clean-sky-rts" => { clean_sky_rts(&install_dir) },
         "full-install" => {
-            clean_core(&install_dir)?;
-            clean_sky_rts(&install_dir)?;
+            try_clean_core(&install_dir)?;
+            try_clean_sky_rts(&install_dir)?;
             get_core     (&install_dir, &args)?;
             get_sky_rts  (&install_dir, &args)?;
             build_core   (&install_dir)?;
             build_sky_rts(&install_dir)?;
+            Ok(())
+        },
+        "full-clean" => {
+            try_clean_core(&install_dir)?;
+            try_clean_sky_rts(&install_dir)?;
             Ok(())
         },
         _ => {
@@ -119,6 +125,7 @@ fn try_command(command : &String, args : Args) -> Result<(), Box<Error>> {
 #[cfg(target_os="windows")]
 fn remove_tree(dir : &PathBuf) -> Result<(), Box<Error>> {
     //rmdir c:\test /s /q
+    println!("...removing {:?}", dir);
     let command : String = "rmdir".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push(dir.as_path().to_str().unwrap().to_string());
@@ -133,6 +140,7 @@ fn remove_tree(dir : &PathBuf) -> Result<(), Box<Error>> {
 
 #[cfg(any(target_os="linux", target_os="macos"))]
 fn remove_tree(dir : &Path) ->  Result<(), Box<Error>> {
+    println!("...removing {:?}", dir);
     let command : String = "rm".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-rf".to_string());
@@ -144,12 +152,29 @@ fn remove_tree(dir : &Path) ->  Result<(), Box<Error>> {
     Ok(())
 }
 
+fn try_clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+    let mut success : bool = false;
+    let mut count = 0;
+    while !success {
+        let result = clean_core(install_dir);
+        match result {
+            Ok(_) => { success = true;},
+            Err(err) => { 
+                count = count + 1;
+                if count > 2 {
+                    return Err(err);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     println!("Cleaning any core files present...");
     let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if scaii_dir.as_path().exists() {
-        println!("...removing SCAII directory {:?}", scaii_dir);
         remove_tree(&scaii_dir)?;
     }
     
@@ -160,7 +185,7 @@ fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     scaii_core_path.push("bin");
     scaii_core_path.push("scaii.core".to_string());
     if scaii_core_path.as_path().exists() {
-        println!("removing scaii.core");
+        println!("removing core binary {:?}", scaii_core_path);
         fs::remove_file(&scaii_core_path)?;
     }
     
@@ -168,28 +193,34 @@ fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     let mut glue = get_dot_scaii_dir()?;
     glue.push("glue".to_string());
     if glue.as_path().exists() {
-        println!("removing glue");
         remove_tree(&glue)?;
     }
     Ok(())
 }
 
+fn try_clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+    let mut success : bool = false;
+    let mut count = 0;
+    while !success {
+        let result = clean_sky_rts(install_dir);
+        match result {
+            Ok(_) => { success = true;},
+            Err(err) => { 
+                count = count + 1;
+                if count > 2 {
+                    return Err(err);
+                }
+            }
+        }
+    }
+    Ok(())
+}
 fn clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     println!("Cleaning any sky-rts files present...");
     let mut rts_dir = install_dir.clone();
     rts_dir.push("Sky-RTS".to_string());
     if rts_dir.as_path().exists() {
-        println!("...removing Sky-RTS directory {:?}", rts_dir);
         remove_tree(&rts_dir)?;
-    }
-
-    // ~/.scaii/backends/sky-rts
-    let mut dir = get_dot_scaii_dir()?;
-    dir.push("backends".to_string());
-    dir.push("sky-rts".to_string());
-    if dir.as_path().exists() {
-        println!("...removing sky-rts artifacts.");
-        remove_tree(&dir)?;
     }
 
     // rm ~/.scaii/backends/bin/libsky-rts.so
@@ -198,8 +229,18 @@ fn clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     sky_binary.push("bin".to_string());
     sky_binary.push("sky-rts.scm".to_string());
     if sky_binary.as_path().exists() {
+        println!("...removing sky-rts binary {:?}",sky_binary);
         fs::remove_file(&sky_binary)?;
     }
+
+    // ~/.scaii/backends/sky-rts
+    let mut dir = get_dot_scaii_dir()?;
+    dir.push("backends".to_string());
+    dir.push("sky-rts".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+    }
+
     Ok(())
 }
 
@@ -543,6 +584,7 @@ fn copy_recursive(source : &PathBuf, dest: &PathBuf) -> Result<(), Box<Error>> {
 
 #[cfg(any(target_os="linux", target_os="macos"))]
 fn copy_recursive(source : &PathBuf, dest: &PathBuf) -> Result<(), Box<Error>> {
+    println!("...copying files from {:?} to {:?}", source, dest);
     let command : String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-r".to_string());
@@ -593,6 +635,7 @@ fn install_google_closure_library(mut closure_install_dir : PathBuf, url : Strin
     env::set_current_dir(&closure_install_dir)?;
     let mut closure_zip_path: PathBuf = closure_install_dir.clone();
     closure_zip_path.push(filename);
+    println!("...downloading closure zip");
     let curl_result = download_using_curl(&url, &closure_zip_path);
     match curl_result {
         Ok(_) => {
@@ -602,7 +645,7 @@ fn install_google_closure_library(mut closure_install_dir : PathBuf, url : Strin
                 Err(Box::new(InstallError::new(&format!("google closure library download appears to have failed - file not present {:?}", closure_zip_path ))))
             }
             else {
-                println!("downloaded closure zip...");
+                println!("...unzipping");
                 let f = fs::File::open(closure_zip_path)?;
                 unzip_file(&closure_install_dir,f)?;
                 let mut closure_temp_dir_name = closure_install_dir.clone();
@@ -635,9 +678,9 @@ fn install_google_closure_library(mut closure_install_dir : PathBuf, url : Strin
 }
 
 fn install_protobuf_javascript_lib(install_dir :&PathBuf)  ->  Result<(), Box<Error>> {
+    println!("Installing google protobuf javascript library...");
     let orig_dir_pathbuf = env::current_dir()?;
     let mut js_dir = install_dir.clone();
-    js_dir.push("SCAII".to_string());
     js_dir.push("viz".to_string());
     js_dir.push("js".to_string());
     env::set_current_dir(js_dir.as_path())?;
@@ -645,14 +688,17 @@ fn install_protobuf_javascript_lib(install_dir :&PathBuf)  ->  Result<(), Box<Er
     let mut args: Vec<String> = Vec::new();
     args.push("clone".to_string());
     args.push("https://github.com/google/protobuf".to_string());
+    println!("...cloning repo");
     let result_string = run_command(&command, args)?;
     verify_git_clone_success(&result_string)?;
     
     let mut protobuf_slash_js_dir= js_dir.clone();
+    protobuf_slash_js_dir.push("protobuf".to_string());
     protobuf_slash_js_dir.push("js".to_string());
 
     let mut protobuf_js_dir= js_dir.clone();
     protobuf_js_dir.push("protobuf_js".to_string());
+    println!("...copying javascript portion");
     copy_recursive(&protobuf_slash_js_dir, &protobuf_js_dir)?;
     
     let mut protobuf_dir = js_dir.clone();
