@@ -50,8 +50,10 @@ fn usage() {
     println!("  sky-install get-sky-rts [branch]   // pull default RTS");
     println!("  sky-install build-core             // build/configure core");
     println!("  sky-install build-sky-rts          // build/configure default RTS");
-    println!("  sky-install clean-core             // remove core and arifacts");
-    println!("  sky-install clean-sky-rts          // remove default RTS and artifacts");
+    println!("  sky-install clean-core-all         // remove core pull and build arifacts");
+    println!("  sky-install clean-core-build       // remove core build arifacts");
+    println!("  sky-install clean-sky-rts-all      // remove RTS pull and build artifacts");
+    println!("  sky-install clean-sky-rts-build    // remove RTS build artifacts");
     println!("  sky-install full-install [branch]  // pull/build/configure all");
     println!("  sky-install full-clean             // pull/build/configure all");
     println!("");
@@ -89,20 +91,22 @@ fn try_command(command : &String, args : Args) -> Result<(), Box<Error>> {
     let install_dir = get_default_install_dir()?;
     match command.as_ref() {
         "get-core" => {
-            try_clean_core(&install_dir)?;
+            try_clean_core_all(&install_dir)?;
             get_core(&install_dir, &args)
         },
         "get-sky-rts" => { 
-            try_clean_sky_rts(&install_dir)?;
+            try_clean_sky_rts_all(&install_dir)?;
             get_sky_rts(&install_dir, &args)
         },
         "build-core" => { build_core(&install_dir) },
         "build-sky-rts" => { build_sky_rts(&install_dir) },
-        "clean-core" => { clean_core(&install_dir) },
-        "clean-sky-rts" => { clean_sky_rts(&install_dir) },
+        "clean-core-all" => { try_clean_core_all(&install_dir) },
+        "clean-core-build" => { try_clean_core_build() },
+        "clean-sky-rts-all" => { try_clean_sky_rts_all(&install_dir) },
+        "clean-sky-rts-build" => { try_clean_sky_rts_build() },
         "full-install" => {
-            try_clean_core(&install_dir)?;
-            try_clean_sky_rts(&install_dir)?;
+            try_clean_core_all(&install_dir)?;
+            try_clean_sky_rts_all(&install_dir)?;
             get_core     (&install_dir, &args)?;
             get_sky_rts  (&install_dir, &args)?;
             build_core   (&install_dir)?;
@@ -110,8 +114,8 @@ fn try_command(command : &String, args : Args) -> Result<(), Box<Error>> {
             Ok(())
         },
         "full-clean" => {
-            try_clean_core(&install_dir)?;
-            try_clean_sky_rts(&install_dir)?;
+            try_clean_core_all(&install_dir)?;
+            try_clean_sky_rts_all(&install_dir)?;
             Ok(())
         },
         _ => {
@@ -153,11 +157,11 @@ fn remove_tree(dir : &Path) ->  Result<(), Box<Error>> {
     Ok(())
 }
 
-fn try_clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+fn try_clean_core_all(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     let mut success : bool = false;
     let mut count = 0;
     while !success {
-        let result = clean_core(install_dir);
+        let result = clean_core_all(install_dir);
         match result {
             Ok(_) => { success = true;},
             Err(err) => { 
@@ -171,17 +175,29 @@ fn try_clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
-    println!("");
-    println!("");
-    println!("Cleaning core...");
-    println!("");
-    let mut scaii_dir = install_dir.clone();
-    scaii_dir.push("SCAII".to_string());
-    if scaii_dir.as_path().exists() {
-        remove_tree(&scaii_dir)?;
+fn try_clean_core_build() -> Result<(), Box<Error>> {
+    let mut success : bool = false;
+    let mut count = 0;
+    while !success {
+        let result = clean_core_build();
+        match result {
+            Ok(_) => { success = true;},
+            Err(err) => { 
+                count = count + 1;
+                if count > 2 {
+                    return Err(err);
+                }
+            }
+        }
     }
-    
+    Ok(())
+}
+
+fn clean_core_build() -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("Removing core build artifacts...");
+    println!("");
     //rm ~/.scaii/bin/scaii.core
     let mut scaii_core_path = get_dot_scaii_dir()?;
     scaii_core_path.push("bin");
@@ -200,11 +216,25 @@ fn clean_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn try_clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+fn clean_core_all(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("Removing core pull...");
+    println!("");
+    let mut scaii_dir = install_dir.clone();
+    scaii_dir.push("SCAII".to_string());
+    if scaii_dir.as_path().exists() {
+        remove_tree(&scaii_dir)?;
+    }
+    clean_core_build()?;
+    Ok(())
+}
+
+fn try_clean_sky_rts_all(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     let mut success : bool = false;
     let mut count = 0;
     while !success {
-        let result = clean_sky_rts(install_dir);
+        let result = clean_sky_rts_all(install_dir);
         match result {
             Ok(_) => { success = true;},
             Err(err) => { 
@@ -217,17 +247,30 @@ fn try_clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     }
     Ok(())
 }
-fn clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
-    println!("");
-    println!("");
-    println!("Cleaning Sky-RTS...");
-    println!("");
-    let mut rts_dir = install_dir.clone();
-    rts_dir.push("Sky-RTS".to_string());
-    if rts_dir.as_path().exists() {
-        remove_tree(&rts_dir)?;
-    }
 
+fn try_clean_sky_rts_build() -> Result<(), Box<Error>> {
+    let mut success : bool = false;
+    let mut count = 0;
+    while !success {
+        let result = clean_sky_rts_build();
+        match result {
+            Ok(_) => { success = true;},
+            Err(err) => { 
+                count = count + 1;
+                if count > 2 {
+                    return Err(err);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn clean_sky_rts_build() -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("removing Sky-RTS build artifacts...");
+    println!("");
     // rm ~/.scaii/backends/bin/libsky-rts.so
     let mut sky_binary = get_dot_scaii_dir()?;
     sky_binary.push("backends".to_string());
@@ -245,7 +288,20 @@ fn clean_sky_rts(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     if dir.as_path().exists() {
         remove_tree(&dir)?;
     }
+    Ok(())
+}
 
+fn clean_sky_rts_all(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+    println!("");
+    println!("");
+    println!("removing Sky-RTS pull...");
+    println!("");
+    let mut rts_dir = install_dir.clone();
+    rts_dir.push("Sky-RTS".to_string());
+    if rts_dir.as_path().exists() {
+        remove_tree(&rts_dir)?;
+    }
+    clean_sky_rts_build()?;
     Ok(())
 }
 
