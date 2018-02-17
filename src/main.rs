@@ -879,12 +879,8 @@ fn unzip_file(parent : &PathBuf, zip_file : fs::File) -> Result<(), Box<Error>> 
 }
 
 
-fn emit_output(output : &Output) {
-    let stdout = String::from_utf8_lossy(&output.stdout);
+fn emit_error_output(output : &Output) {
     let stderr = String::from_utf8_lossy(&output.stderr);
-    if stdout != "" {
-        println!("   ...stdout: {}", stdout);
-    }
     if stderr != "" {
         println!("   ...stderr: {}", stderr);
     }
@@ -892,6 +888,8 @@ fn emit_output(output : &Output) {
 
 #[cfg(target_os="windows")]
 fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, Box<Error>> {
+    use std::process::Stdio;
+
     let mut c = Command::new("cmd");
     let c = c.arg("/C");
     let c = c.arg(command);
@@ -899,10 +897,10 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
         c.arg(arg);
     }
     println!("...running command {:?}", c);
-    let output = c.output().expect(&String::as_str(
+    let output = c.stdout(Stdio::inherit()).output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
-    emit_output(&output);
+    emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result{
@@ -919,15 +917,17 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
 fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, Box<Error>> {
     let mut c = Command::new("sh");
     let c = c.arg("-c");
+    let c = c.arg("\"");
     let c = c.arg(command);
     for arg in args.iter() {
         c.arg(arg);
     }
+    let c = c.arg("\"");
     println!("...running command {:?}", c);
-    let output = c.output().expect(&String::as_str(
+    let output = c.stdout(Stdio::inherit()).output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
-    emit_output(&output);
+    emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result{
@@ -953,7 +953,7 @@ fn run_command_platform(command: &String, args: Vec<String>) -> Result<String, B
     }
     println!("...in dir...{:?}", env::current_dir());
     println!("...running command {:?}", c);
-    let output = c.output().expect(&String::as_str(
+    let output = c.stdout(Stdio::inherit()).output().expect(&String::as_str(
         &format!("failed to launch command {}", command),
     ));
 
