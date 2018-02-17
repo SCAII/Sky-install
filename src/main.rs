@@ -6,6 +6,7 @@ use std::process::Command;
 use std::fmt;
 use std::error::Error;
 use std::env;
+//use std::path::{Path,PathBuf};
 use std::path::PathBuf;
 use std::fs;
 #[cfg(any(target_os="linux", target_os="macos"))]
@@ -151,7 +152,7 @@ fn remove_tree(dir : &Path) ->  Result<(), Box<Error>> {
     args.push("-rf".to_string());
     args.push(dir.as_path().to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;
-    if result != "" {
+    if result_string != "" {
         return Err(Box::new(InstallError::new(&format!("ERROR trying to delete files {}", result_string))))
     }
     Ok(())
@@ -367,7 +368,7 @@ fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<E
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let url = "https://github.com/SCAII/SCAII.git";
-    let repo = match Repository::clone(url, shared_parent.to_str()) {
+    let repo = match Repository::clone(url, install_dir.to_str()) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
