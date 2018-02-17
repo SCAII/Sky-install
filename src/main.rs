@@ -64,8 +64,8 @@ fn usage() {
 
 fn main() {
     let arguments: Vec<String> = env::args().collect();
+    let args = parse_args(&arguments);
     let command = arguments[1].clone();
-    let args = parse_args(arguments);
     let result = try_command(&command, args);
     match result {
         Ok(()) => {},
@@ -76,7 +76,7 @@ fn main() {
     }
 }
 
-fn parse_args(arguments : Vec<String>) -> Args {
+fn parse_args(arguments : &Vec<String>) -> Args {
     let mut args = Args {
         flag_branch : false,
         arg_branch_name : "".to_string(),
@@ -84,6 +84,9 @@ fn parse_args(arguments : Vec<String>) -> Args {
     if arguments.len() > 2 {
         args.flag_branch = true;
         args.arg_branch_name = arguments[2].clone();
+    }else{
+        usage();
+        std::process::exit(0);
     }
     args
 }
@@ -145,7 +148,7 @@ fn remove_tree(dir : &PathBuf) -> Result<(), Box<Error>> {
 }
 
 #[cfg(any(target_os="linux", target_os="macos"))]
-fn remove_tree(dir : &Path) ->  Result<(), Box<Error>> {
+fn remove_tree(dir : &PathBuf) ->  Result<(), Box<Error>> {
     println!("...removing {:?}", dir);
     let command : String = "rm".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -359,7 +362,7 @@ fn verify_git_clone_success(result_string : &String) -> Result<(), Box<Error>>  
 }
 
 #[cfg(any(target_os="linux", target_os="macos"))]
-fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>>{
+fn get_core(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Error>>{
     println!("");
     println!("");
     println!("installing core...");
@@ -368,11 +371,11 @@ fn get_core(mut install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<E
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let url = "https://github.com/SCAII/SCAII.git";
-    let repo = match Repository::clone(url, install_dir.to_str()) {
+    let _repo = match Repository::clone(url, install_dir.to_str().unwrap()) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
-    let scaii_dir = install_dir.clone();
+    let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
         println!("...cd {:?}", scaii_dir);
@@ -421,14 +424,15 @@ fn get_sky_rts(install_dir : &PathBuf, command_args: &Args) -> Result<(), Box<Er
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.as_path())?;
     let url = "https://github.com/SCAII/Sky-RTS.git";
-    let repo = match Repository::clone(url, install_dir.to_str()) {
+    let _repo = match Repository::clone(url, install_dir.to_str().unwrap()) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
     if command_args.flag_branch {
-        install_dir.push("Sky-RTS".to_string());
-        println!("...cd {:?}", install_dir);
-        env::set_current_dir(install_dir.as_path())?;
+        let mut sky_rts_dir = install_dir.clone();
+        sky_rts_dir.push("Sky-RTS".to_string());
+        println!("...cd {:?}", sky_rts_dir);
+        env::set_current_dir(sky_rts_dir.as_path())?;
         checkout(&command_args.arg_branch_name)?;
     }
     env::set_current_dir(orig_dir_pathbuf.as_path())?;
@@ -686,10 +690,10 @@ fn copy_recursive(source : &PathBuf, dest: &PathBuf) -> Result<(), Box<Error>> {
     let command : String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-r".to_string());
-    args.push(source.as_str());
-    args.push(dest.as_str());
+    args.push(source.to_str().unwrap().to_string());
+    args.push(dest.to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;
-    if !(result_string = "".to_string()){
+    if !(result_string == "".to_string()){
         return Err(Box::new(InstallError::new(&format!("ERROR - problem copying files {:?}", result_string))))
     }
     Ok(())
