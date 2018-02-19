@@ -7,5 +7,7 @@ pub use self::windows::*;
 mod unix;
 #[cfg(unix)]
 pub use self::unix::*;
+#[cfg(unix)]
+pub use self::unix::os_specific::*;
 
 pub mod common;
