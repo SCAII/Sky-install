@@ -1,9 +1,11 @@
 extern crate git2;
 
 #[path = "macos.rs"]
+#[cfg(target_os = "macos")]
 mod os_specific;
 
 #[path = "linux.rs"]
+#[cfg(target_os = "linux")]
 mod os_specific;
 
 pub use os_specific::*;
