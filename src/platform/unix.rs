@@ -26,7 +26,7 @@ pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
     args.push(dir.as_ref().to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;
     if result_string != "" {
-        return Err(Box::new(InstallError::new(&format!(
+        return Err(Box::new(InstallError::new(format!(
             "ERROR trying to delete files {}",
             result_string
         ))));
@@ -54,8 +54,8 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
         env::set_current_dir(scaii_dir)?;
         checkout(&command_args.arg_branch_name)?;
     }
-    ensure_google_closure_lib_installed(&scaii_dir)?;
-    install_protobuf_javascript_lib(&scaii_dir)?;
+    ensure_google_closure_lib_installed(scaii_dir)?;
+    install_protobuf_javascript_lib(scaii_dir)?;
     env::set_current_dir(orig_dir_pathbuf)?;
     Ok(())
 }
@@ -78,7 +78,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
         sky_rts_dir.push("Sky-RTS".to_string());
         println!("...cd {:?}", sky_rts_dir);
         env::set_current_dir(sky_rts_dir)?;
-        checkout(&command_args.arg_branch_name)?;
+        checkout(command_args.arg_branch_name.clone())?;
     }
     env::set_current_dir(orig_dir_pathbuf)?;
     Ok(())
@@ -93,7 +93,7 @@ pub fn copy_recursive<P: AsRef<Path>>(source: PathBuf, dest: P) -> Result<(), Bo
     args.push(dest.to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;
     if !(result_string == "".to_string()) {
-        return Err(Box::new(InstallError::new(&format!(
+        return Err(Box::new(InstallError::new(format!(
             "ERROR - problem copying files {:?}",
             result_string
         ))));
