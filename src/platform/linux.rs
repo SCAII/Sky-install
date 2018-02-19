@@ -10,7 +10,7 @@ pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result
     copy_source_named(source_dir, target, "libscaii_core.so".to_string())
 }
 
-pub fn run_command(command: String, args: Vec<String>) -> Result<String, Box<Error>> {
+pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     let mut c = Command::new("sh");
     let c = c.arg("-c");
     let c = c.arg("\"");
