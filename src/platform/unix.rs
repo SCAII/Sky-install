@@ -1,12 +1,20 @@
 extern crate git2;
 
+use std::path::{Path, PathBuf};
+use std::error::Error;
+use std::fmt::Debug;
+use error::InstallError;
+use Args;
+
+use platform::common::*;
+
 #[path = "macos.rs"]
 #[cfg(target_os = "macos")]
-mod os_specific;
+pub mod os_specific;
 
 #[path = "linux.rs"]
 #[cfg(target_os = "linux")]
-mod os_specific;
+pub mod os_specific;
 
 pub use os_specific::*;
 
