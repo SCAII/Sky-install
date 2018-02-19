@@ -8,7 +8,7 @@ pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<
     copy_source_named(source_dir, target, "libbackend.dylib".to_string())
 }
 
-fn run_command_platform(command: String, args: Vec<String>) -> Result<String, Box<Error>> {
+fn run_command(command: String, args: Vec<String>) -> Result<String, Box<Error>> {
     // note - using the sh -c approach on Mac caused the chmod command to fail.  Leaving them out
     // let it succeed, so left it that way assuming all commands would be similar.
     //let mut c = Command::new("sh");
