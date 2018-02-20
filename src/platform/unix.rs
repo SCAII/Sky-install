@@ -54,7 +54,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
         println!("...cd {:?}", scaii_dir);
-        env::set_current_dir(scaii_dir)?;
+        env::set_current_dir(scaii_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
     ensure_google_closure_lib_installed(scaii_dir)?;
@@ -83,7 +83,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
         let mut sky_rts_dir = install_dir.clone();
         sky_rts_dir.push("Sky-RTS".to_string());
         println!("...cd {:?}", sky_rts_dir);
-        env::set_current_dir(sky_rts_dir)?;
+        env::set_current_dir(sky_rts_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
     env::set_current_dir(orig_dir_pathbuf)?;
