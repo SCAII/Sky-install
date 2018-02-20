@@ -36,7 +36,7 @@ pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
 
 pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
     use std::env;
-    use git2::Repository;
+    use self::git2::Repository;
 
     println!("");
     println!("");
@@ -64,6 +64,9 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
 }
 
 pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
+    use std::env;
+    use self::git2::Repository;
+
     println!("");
     println!("");
     println!("installing Sky-RTS...");
