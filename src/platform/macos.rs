@@ -1,16 +1,18 @@
 extern crate git2;
 
 use std::error::Error;
-use std::path::{Path, Pathbuf};
+use std::path::{Path, PathBuf};
 
 pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+    use platform::common;
     //cp target/release/??? ~/.scaii/bin/
-    copy_source_named(source_dir, target, "libscaii_core.dylib".to_string())
+    common::copy_source_named(source_dir, target, "libscaii_core.dylib".to_string())
 }
 
 pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+    use platform::common;
     //cp target/release/??? ~/.scaii/bin/
-    copy_source_named(source_dir, target, "libbackend.dylib".to_string())
+    common::copy_source_named(source_dir, target, "libbackend.dylib".to_string())
 }
 
 fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {

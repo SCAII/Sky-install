@@ -1,7 +1,7 @@
 extern crate git2;
 
 use std::error::Error;
-use std::path::{Path, Pathbuf};
+use std::path::{Path, PathBuf};
 
 pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
     use platform::common;
