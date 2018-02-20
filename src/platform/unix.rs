@@ -52,7 +52,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     if command_args.flag_branch {
         println!("...cd {:?}", scaii_dir);
         env::set_current_dir(scaii_dir)?;
-        checkout(&command_args.arg_branch_name)?;
+        checkout(command_args.arg_branch_name.clone())?;
     }
     ensure_google_closure_lib_installed(scaii_dir)?;
     install_protobuf_javascript_lib(scaii_dir)?;
@@ -67,7 +67,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     println!("");
     let orig_dir_pathbuf = env::current_dir()?;
     println!("...cd {:?}", orig_dir_pathbuf);
-    env::set_current_dir(install_di)?;
+    env::set_current_dir(install_dir)?;
     let url = "https://github.com/SCAII/Sky-RTS.git";
     let _repo = match Repository::clone(url, install_dir.to_str().unwrap()) {
         Ok(repo) => repo,
@@ -84,7 +84,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     Ok(())
 }
 
-pub fn copy_recursive<P: AsRef<Path>+Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
+pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
     println!("...copying files from {:?} to {:?}", source, dest);
     let command: String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();

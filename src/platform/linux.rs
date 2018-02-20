@@ -4,13 +4,15 @@ use std::error::Error;
 use std::path::{Path, Pathbuf};
 
 pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+    use platform::common;
     //cp target/release/libscaii_core.so ~/.scaii/bin/
-    copy_source_named(source_dir, target, "libbackend.so".to_string())
+    common::copy_source_named(source_dir, target, "libbackend.so".to_string())
 }
 
 pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+    use platform::common;
     //cp target/release/libscaii_core.so ~/.scaii/bin/
-    copy_source_named(source_dir, target, "libscaii_core.so".to_string())
+    common::copy_source_named(source_dir, target, "libscaii_core.so".to_string())
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
@@ -29,10 +31,7 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&format!(
-            "failed to launch command {}",
-            command
-        ));
+        .expect(&format!("failed to launch command {}", command));
     common::emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
