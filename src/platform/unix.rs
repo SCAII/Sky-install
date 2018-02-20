@@ -84,13 +84,13 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     Ok(())
 }
 
-pub fn copy_recursive<P: AsRef<Path>>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
+pub fn copy_recursive<P: AsRef<Path>+Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
     println!("...copying files from {:?} to {:?}", source, dest);
     let command: String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-r".to_string());
     args.push(source.to_str().unwrap().to_string());
-    args.push(dest.to_str().unwrap().to_string());
+    args.push(dest.as_ref().to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;
     if !(result_string == "".to_string()) {
         return Err(Box::new(InstallError::new(format!(
