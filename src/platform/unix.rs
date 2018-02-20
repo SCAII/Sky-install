@@ -57,7 +57,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
         env::set_current_dir(scaii_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
-    ensure_google_closure_lib_installed(scaii_dir)?;
+    ensure_google_closure_lib_installed(scaii_dir.clone())?;
     install_protobuf_javascript_lib(scaii_dir)?;
     env::set_current_dir(orig_dir_pathbuf)?;
     Ok(())
