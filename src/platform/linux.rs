@@ -39,7 +39,7 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
         match result {
             Ok(output_string) => Ok(output_string),
             Err(_utf8_convert_error) => Err(Box::new(InstallError::new(
-                "problem converting command result from utf8",
+                "problem converting command result from utf8".to_string(),
             ))),
         }
     } else {
