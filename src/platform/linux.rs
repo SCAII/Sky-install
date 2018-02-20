@@ -29,10 +29,10 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&String::as_str(format!(
+        .expect(&format!(
             "failed to launch command {}",
             command
-        )));
+        ));
     common::emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
