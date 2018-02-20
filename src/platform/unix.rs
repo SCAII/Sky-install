@@ -46,7 +46,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir)?;
     let url = "https://github.com/SCAII/SCAII.git";
-    let _repo = match Repository::clone(url, install_dir.to_str().unwrap()) {
+    let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
@@ -75,7 +75,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir)?;
     let url = "https://github.com/SCAII/Sky-RTS.git";
-    let _repo = match Repository::clone(url, install_dir.to_str().unwrap()) {
+    let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
         Ok(repo) => repo,
         Err(e) => panic!("failed to clone: {}", e),
     };
