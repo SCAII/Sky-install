@@ -14,6 +14,10 @@ pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<
 }
 
 fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
+    use std::process::{Command, Stdio};
+    use error::InstallError;
+    use platform::common;
+
     // note - using the sh -c approach on Mac caused the chmod command to fail.  Leaving them out
     // let it succeed, so left it that way assuming all commands would be similar.
     //let mut c = Command::new("sh");
@@ -27,12 +31,12 @@ fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&String::as_str(&format!(
+        .expect(&String::as_str(format!(
             "failed to launch command {}",
             command
         )));
 
-    emit_output(&output);
+    common::emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result {
@@ -42,8 +46,8 @@ fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
             ))),
         }
     } else {
-        Err(Box::new(InstallError::new(&String::from_utf8_lossy(
-            &output.stderr,
-        ))))
+        Err(Box::new(InstallError::new(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        )))
     }
 }

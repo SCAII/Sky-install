@@ -14,6 +14,10 @@ pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
+    use std::process::{Command, Stdio};
+    use error::InstallError;
+    use platform::common;
+
     let mut c = Command::new("sh");
     let c = c.arg("-c");
     let c = c.arg("\"");
@@ -25,11 +29,11 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&String::as_str(&format!(
+        .expect(&String::as_str(format!(
             "failed to launch command {}",
             command
         )));
-    emit_error_output(&output);
+    common::emit_error_output(&output);
     if output.status.success() {
         let result = String::from_utf8(output.stdout);
         match result {
@@ -39,8 +43,8 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
             ))),
         }
     } else {
-        Err(Box::new(InstallError::new(&String::from_utf8_lossy(
-            &output.stderr,
-        ))))
+        Err(Box::new(InstallError::new(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        )))
     }
 }
