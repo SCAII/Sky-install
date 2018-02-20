@@ -1,5 +1,8 @@
 extern crate git2;
 
+use std::error::Error;
+use std::path::{Path, Pathbuf};
+
 pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
     //cp target/release/libscaii_core.so ~/.scaii/bin/
     copy_source_named(source_dir, target, "libbackend.so".to_string())

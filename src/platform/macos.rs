@@ -1,3 +1,8 @@
+extern crate git2;
+
+use std::error::Error;
+use std::path::{Path, Pathbuf};
+
 pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
     //cp target/release/??? ~/.scaii/bin/
     copy_source_named(source_dir, target, "libscaii_core.dylib".to_string())
