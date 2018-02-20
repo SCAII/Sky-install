@@ -56,12 +56,12 @@ fn parse_args(arguments: &Vec<String>) -> Args {
         flag_branch: false,
         arg_branch_name: "".to_string(),
     };
-    if arguments.len() > 2 {
-        args.flag_branch = true;
-        args.arg_branch_name = arguments[2].clone();
-    } else {
+    if arguments.len() < 2 {
         usage();
         std::process::exit(0);
+    } else if arguments.len() > 2 {
+        args.flag_branch = true;
+        args.arg_branch_name = arguments[2].clone();
     }
     args
 }
@@ -324,9 +324,8 @@ fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     let mut source = scaii_install_dir.clone();
     source.push("target".to_string());
     source.push("release".to_string());
-    let mut target = bindir.clone();
-    target.push("scaii.core".to_string());
-    copy_built_core(source, &target)?;
+    let target = bindir.clone();
+    copy_built_core(source, target)?;
 
     //cp -r glue ~/.scaii/
     let mut source = scaii_install_dir.clone();
@@ -425,8 +424,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     let mut dest = get_dot_scaii_dir()?;
     dest.push("backends".to_string());
     dest.push("bin".to_string());
-    dest.push("sky-rts.scm".to_string());
-    copy_built_rts(source, &dest)?;
+    copy_built_rts(source, dest)?;
 
     // cp -r game_wrapper/python/* ~/.scaii/glue/python/scaii/env/sky_rts/
     let mut source = sky_rts_dir.clone();
