@@ -150,13 +150,15 @@ pub fn install_google_closure_library(
     }
 }
 
-pub fn copy_source_named<P: AsRef<Path>>(
+pub fn copy_source_named(
     source_dir: PathBuf,
-    target: P,
+    target_dir: PathBuf,
     source_filename: String,
 ) -> Result<(), Box<Error>> {
     let mut source: PathBuf = source_dir;
-    source.push(source_filename);
+    source.push(source_filename.clone());
+    let mut target: PathBuf = target_dir;
+    target.push(source_filename);
     copy_file(&source, target)?;
     Ok(())
 }

@@ -84,12 +84,12 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     Ok(())
 }
 
-pub fn copy_built_core<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
     copy_source_named(source_dir, target, "scaii_core.dll".to_string())
 }
 
-pub fn copy_built_rts<P: AsRef<Path>>(source_dir: PathBuf, target: P) -> Result<(), Box<Error>> {
+pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
     copy_source_named(source_dir, target, "backend.dll".to_string())
 }
