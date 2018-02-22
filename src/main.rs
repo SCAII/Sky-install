@@ -62,6 +62,10 @@ fn parse_args(arguments: &Vec<String>) -> Args {
     } else if arguments.len() > 2 {
         args.flag_branch = true;
         args.arg_branch_name = arguments[2].clone();
+    } else if arguments.len() == 2 {
+        args.flag_branch = true;
+        args.arg_branch_name = "dev".to_string();
+        println!("No branch specified, defaulting to 'dev'");
     }
     args
 }
@@ -388,6 +392,8 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     //mkdir ~/.scaii/glue/python/scaii/env/sky_rts
     dir.pop();
     dir.pop();
+    dir.pop();
+    println!("\t\tDIR: {:?}", dir);
     dir.push("glue".to_string());
     dir.push("python".to_string());
     dir.push("scaii".to_string());

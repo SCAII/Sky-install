@@ -12,13 +12,14 @@ pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<E
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
     //cp target/release/??? ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libbackend.dylib".to_string())
+    common::copy_source_named(source_dir, target, "libsky-rts.dylib".to_string())
 }
 
-fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
+pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     use std::process::{Command, Stdio};
     use error::InstallError;
     use platform::common;
+    use std::env;
 
     // note - using the sh -c approach on Mac caused the chmod command to fail.  Leaving them out
     // let it succeed, so left it that way assuming all commands would be similar.
@@ -33,7 +34,7 @@ fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&String::as_str(format!(
+        .expect(&String::as_str(&format!(
             "failed to launch command {}",
             command
         )));
