@@ -21,17 +21,18 @@ pub struct Args {
 }
 
 fn usage() {
-    println!("Usage:");
-    println!("  sky-install get-core    [branch]   // pull SCAII code");
-    println!("  sky-install get-sky-rts [branch]   // pull default RTS");
-    println!("  sky-install build-core             // build/configure core");
-    println!("  sky-install build-sky-rts          // build/configure default RTS");
-    println!("  sky-install clean-core-all         // remove core pull and build artifacts");
-    println!("  sky-install clean-core-build       // remove core build artifacts");
-    println!("  sky-install clean-sky-rts-all      // remove RTS pull and build artifacts");
-    println!("  sky-install clean-sky-rts-build    // remove RTS build artifacts");
-    println!("  sky-install full-install [branch]  // pull/build/configure all");
-    println!("  sky-install full-clean             // pull/build/configure all");
+    println!("\nUsage:");
+    println!("\tsky-install get-core    [branch]   \t pull SCAII code");
+    println!("\tsky-install get-sky-rts [branch]   \t pull default RTS");
+    println!("\tsky-install build-core             \t build/configure core");
+    println!("\tsky-install build-sky-rts          \t build/configure default RTS");
+    println!("\tsky-install clean-core-all         \t remove core pull and build artifacts");
+    println!("\tsky-install clean-core-build       \t remove core build artifacts");
+    println!("\tsky-install clean-sky-rts-all      \t remove RTS pull and build artifacts");
+    println!("\tsky-install clean-sky-rts-build    \t remove RTS build artifacts");
+    println!("\tsky-install full-install [branch]  \t pull/build/configure all");
+    println!("\tsky-install full-clean             \t clean all");
+    println!("\tsky-install re-install   [branch]  \t shallow clean/build/configure all (faster than full-install)");
     println!("");
     println!("via cargo...");
     println!("  cargo build -- <command> [branch]");
@@ -107,7 +108,6 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
                 println!("Previous compile exists. Skipping clean re-compile.
                      \nIf you want to perform a fresh install please run with argumet 
                      \n\t> full-install [branch]");
-                //println!("\t\tSCAII DIR: {:?}", get_dot_scaii_dir()?);
                 shallow_clean();
             }
             build_core(&install_dir)?;
