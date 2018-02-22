@@ -5,8 +5,17 @@ use std::path::{Path, PathBuf};
 
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
+    use std::fs;
+    // rename libbackend.so to libsky-rts.source
+    let mut source = source_dir.clone();
+    source.push("libbackend.so".to_string());
+
+    let mut rename = source_dir.clone();
+    rename.push("libsky-rts.so".to_string());
+    fs::rename(source, rename)?;
+
     //cp target/release/libscaii_core.so ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libbackend.so".to_string())
+    common::copy_source_named(source_dir, target, "libsky-rts.so".to_string())
 }
 
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
