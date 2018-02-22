@@ -5,14 +5,32 @@ use std::path::{Path, PathBuf};
 
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
+    use std::fs;
+    // rename libscaii_core.dylib to scaii_core.dylib
+    let mut source = source_dir.clone();
+    source.push("libscaii_core.dylib".to_string());
+
+    let mut rename = source_dir.clone();
+    rename.push("scaii_core.dylib".to_string());
+    fs::rename(source, rename)?; 
+    
     //cp target/release/??? ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libscaii_core.dylib".to_string())
+    common::copy_source_named(source_dir, target, "scaii_core.dylib".to_string())
 }
 
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
+    use std::fs;
+    // rename libbackend.dylib to libsky-rts.dylib
+    let mut source = source_dir.clone();
+    source.push("libbackend.dylib".to_string());
+
+    let mut rename = source_dir.clone();
+    rename.push("sky-rts.dylib".to_string());
+    fs::rename(source, rename)?; 
+
     //cp target/release/??? ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libsky-rts.dylib".to_string())
+    common::copy_source_named(source_dir, target, "sky-rts.dylib".to_string())
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {

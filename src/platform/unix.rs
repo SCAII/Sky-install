@@ -111,7 +111,7 @@ pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Resul
     println!("...copying files from {:?} to {:?}", source, dest);
     let command: String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
-    args.push("-r".to_string());
+    args.push("-a".to_string());
     args.push(source.to_str().unwrap().to_string());
     args.push(dest.as_ref().to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;

@@ -393,7 +393,6 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     dir.pop();
     dir.pop();
     dir.pop();
-    println!("\t\tDIR: {:?}", dir);
     dir.push("glue".to_string());
     dir.push("python".to_string());
     dir.push("scaii".to_string());
@@ -436,7 +435,12 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     let mut source = sky_rts_dir.clone();
     source.push("game_wrapper".to_string());
     source.push("python".to_string());
-    source.push("*".to_string());
+
+    if cfg!(target_os = "windows") {
+        source.push("*".to_string()); 
+    }else {
+        source.push(".".to_string());
+    }
     let mut dest = get_dot_scaii_dir()?;
     dest.push("glue");
     dest.push("python");
