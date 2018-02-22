@@ -62,6 +62,10 @@ fn parse_args(arguments: &Vec<String>) -> Args {
     } else if arguments.len() > 2 {
         args.flag_branch = true;
         args.arg_branch_name = arguments[2].clone();
+    } else if arguments.len() == 2 {
+        args.flag_branch = true;
+        args.arg_branch_name = "dev".to_string();
+        println!("No branch specified, defaulting to 'dev'");
     }
     args
 }
@@ -388,6 +392,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     //mkdir ~/.scaii/glue/python/scaii/env/sky_rts
     dir.pop();
     dir.pop();
+    dir.pop();
     dir.push("glue".to_string());
     dir.push("python".to_string());
     dir.push("scaii".to_string());
@@ -430,7 +435,12 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     let mut source = sky_rts_dir.clone();
     source.push("game_wrapper".to_string());
     source.push("python".to_string());
-    source.push("*".to_string());
+
+    if cfg!(target_os = "windows") {
+        source.push("*".to_string()); 
+    }else {
+        source.push(".".to_string());
+    }
     let mut dest = get_dot_scaii_dir()?;
     dest.push("glue");
     dest.push("python");

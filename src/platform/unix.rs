@@ -17,6 +17,7 @@ pub mod os_specific;
 pub mod os_specific;
 
 pub use os_specific::*;
+use os_specific::{run_command, copy_built_core};
 
 pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
     println!("...removing {:?}", dir);
@@ -45,11 +46,19 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     let orig_dir_pathbuf = env::current_dir()?;
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.clone())?;
-    let url = "https://github.com/SCAII/SCAII.git";
-    let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}", e),
-    };
+
+    let command: String = "git".to_string();
+    let mut args: Vec<String> = Vec::new();
+    args.push("clone".to_string());
+    args.push("https://github.com/SCAII/SCAII.git".to_string());
+    let result_string = run_command(&command, args)?;
+    verify_git_clone_success(&result_string)?;
+
+    // let url = "https://github.com/SCAII/SCAII.git";
+    // let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
+    //     Ok(repo) => repo,
+    //     Err(e) => panic!("failed to clone: {}", e),
+    // };
     let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
@@ -74,11 +83,19 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     let orig_dir_pathbuf = env::current_dir()?;
     println!("...cd {:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.clone())?;
-    let url = "https://github.com/SCAII/Sky-RTS.git";
-    let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
-        Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}", e),
-    };
+
+    let command: String = "git".to_string();
+    let mut args: Vec<String> = Vec::new();
+    args.push("clone".to_string());
+    args.push("https://github.com/SCAII/Sky-RTS.git".to_string());
+    let result_string = run_command(&command, args)?;
+    verify_git_clone_success(&result_string)?;
+
+    // let url = "https://github.com/SCAII/Sky-RTS.git";
+    // let _repo = match Repository::clone(url, install_dir.clone().to_str().unwrap()) {
+    //     Ok(repo) => repo,
+    //     Err(e) => panic!("failed to clone: {}", e),
+    // };
     if command_args.flag_branch {
         let mut sky_rts_dir = install_dir.clone();
         sky_rts_dir.push("Sky-RTS".to_string());
@@ -94,7 +111,7 @@ pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Resul
     println!("...copying files from {:?} to {:?}", source, dest);
     let command: String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
-    args.push("-r".to_string());
+    args.push("-a".to_string());
     args.push(source.to_str().unwrap().to_string());
     args.push(dest.as_ref().to_str().unwrap().to_string());
     let result_string = run_command(&command, args)?;

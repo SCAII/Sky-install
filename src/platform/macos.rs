@@ -5,20 +5,39 @@ use std::path::{Path, PathBuf};
 
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
+    use std::fs;
+    // rename libscaii_core.dylib to scaii_core.dylib
+    let mut source = source_dir.clone();
+    source.push("libscaii_core.dylib".to_string());
+
+    let mut rename = source_dir.clone();
+    rename.push("scaii_core.dylib".to_string());
+    fs::rename(source, rename)?; 
+    
     //cp target/release/??? ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libscaii_core.dylib".to_string())
+    common::copy_source_named(source_dir, target, "scaii_core.dylib".to_string())
 }
 
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
+    use std::fs;
+    // rename libbackend.dylib to libsky-rts.dylib
+    let mut source = source_dir.clone();
+    source.push("libbackend.dylib".to_string());
+
+    let mut rename = source_dir.clone();
+    rename.push("sky-rts.dylib".to_string());
+    fs::rename(source, rename)?; 
+
     //cp target/release/??? ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libbackend.dylib".to_string())
+    common::copy_source_named(source_dir, target, "sky-rts.dylib".to_string())
 }
 
-fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
+pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     use std::process::{Command, Stdio};
     use error::InstallError;
     use platform::common;
+    use std::env;
 
     // note - using the sh -c approach on Mac caused the chmod command to fail.  Leaving them out
     // let it succeed, so left it that way assuming all commands would be similar.
@@ -33,7 +52,7 @@ fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
-        .expect(&String::as_str(format!(
+        .expect(&String::as_str(&format!(
             "failed to launch command {}",
             command
         )));
