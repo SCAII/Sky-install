@@ -20,14 +20,10 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     use error::InstallError;
     use platform::common;
 
-    let mut c = Command::new("sh");
-    let c = c.arg("-c");
-    let c = c.arg("\"");
-    let c = c.arg(command);
-    for arg in args.iter() {
+    let mut c = Command::new(command);
+    for arg in args {
         c.arg(arg);
     }
-    let c = c.arg("\"");
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
