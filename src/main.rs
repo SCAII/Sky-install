@@ -98,6 +98,22 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
             build_sky_rts(install_dir.clone())?;
             Ok(())
         }
+        "re-install" => {         
+            if !(install_dir.exists()){
+                println!("Previous installation not found. Please run with argument 
+                    \n\t> full-install [branch]");
+                std::process::exit(0);
+            }else{
+                println!("Previous compile exists. Skipping clean re-compile.
+                     \nIf you want to perform a fresh install please run with argumet 
+                     \n\t> full-install [branch]");
+                //println!("\t\tSCAII DIR: {:?}", get_dot_scaii_dir()?);
+                shallow_clean();
+            }
+            build_core(&install_dir)?;
+            build_sky_rts(install_dir.clone())?;
+            Ok(())
+        }
         "full-clean" => {
             try_clean_core_all(install_dir.clone())?;
             try_clean_sky_rts_all(install_dir)?;
@@ -341,6 +357,32 @@ fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 
+fn shallow_clean() -> Result<(), Box<Error>> {
+    let mut dir = get_dot_scaii_dir()?;
+    
+    dir.push("backends".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+        dir.pop();
+    }
+
+    dir.push("bin".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+        dir.pop();
+    }
+
+    dir.push("glue".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+        dir.pop();
+    }
+    Ok(())
+}  
+
 fn get_home_dir() -> Result<PathBuf, Box<Error>> {
     use error::InstallError;
 
@@ -449,16 +491,24 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     dest.push("sky_rts");
     copy_recursive(source, &dest)?;
 
-    // cp backend/lua/tower_example.lua ~/.scaii/backends/sky-rts/maps
+    // cp backend/lua/* ~/.scaii/backends/sky-rts/maps
     let mut source = backend.clone();
     source.push("lua".to_string());
-    source.push("tower_example.lua".to_string());
+    
+    if cfg!(target_os = "windows") {
+        source.push("*".to_string()); 
+    }else {
+        source.push(".".to_string());
+    }
+
     let mut dest = get_dot_scaii_dir()?;
     dest.push("backends".to_string());
     dest.push("sky-rts".to_string());
     dest.push("maps".to_string());
-    dest.push("tower_example.lua".to_string());
-    common::copy_file(&source, &dest)?;
+    //dest.push("tower_example.lua".to_string());
+
+    copy_recursive(source, &dest)?;
+
     // export PYTHONPATH=$PYTHONPATH:/home/lamki/.scaii/bin:/home/lamki/.scaii/glue/python/
     // export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lamki/.scaii/bin/
     env::set_current_dir(orig_dir_pathbuf.as_path())?;
