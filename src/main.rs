@@ -364,22 +364,23 @@ fn shallow_clean() -> Result<(), Box<Error>> {
     if dir.as_path().exists() {
         remove_tree(&dir)?;
         println!("..Shallow clean :: removed {:?}", dir);
-        dir.pop();
     }
+    dir.pop();
 
     dir.push("bin".to_string());
     if dir.as_path().exists() {
         remove_tree(&dir)?;
         println!("..Shallow clean :: removed {:?}", dir);
-        dir.pop();
     }
+    dir.pop();
 
     dir.push("glue".to_string());
     if dir.as_path().exists() {
         remove_tree(&dir)?;
         println!("..Shallow clean :: removed {:?}", dir);
-        dir.pop();
+        
     }
+    dir.pop();
     Ok(())
 }  
 
