@@ -23,7 +23,7 @@ pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<E
         target,
         "libscaii_core.so".to_string(),
         "libscaii_core.so".to_string(),
-    );
+    )
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
