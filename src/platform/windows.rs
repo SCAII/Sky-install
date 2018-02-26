@@ -111,6 +111,7 @@ pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Resul
     args.push(source.as_path().to_str().unwrap().to_string());
     args.push("/i".to_string());
     args.push("/s".to_string());
+    args.push("/Y".to_string());
     args.push(dest.as_ref().to_str().unwrap().to_string());
     let _result_string = run_command(&protoc_hack(command), args)?;
     Ok(())
