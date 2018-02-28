@@ -21,17 +21,18 @@ pub struct Args {
 }
 
 fn usage() {
-    println!("Usage:");
-    println!("  sky-install get-core    [branch]   // pull SCAII code");
-    println!("  sky-install get-sky-rts [branch]   // pull default RTS");
-    println!("  sky-install build-core             // build/configure core");
-    println!("  sky-install build-sky-rts          // build/configure default RTS");
-    println!("  sky-install clean-core-all         // remove core pull and build artifacts");
-    println!("  sky-install clean-core-build       // remove core build artifacts");
-    println!("  sky-install clean-sky-rts-all      // remove RTS pull and build artifacts");
-    println!("  sky-install clean-sky-rts-build    // remove RTS build artifacts");
-    println!("  sky-install full-install [branch]  // pull/build/configure all");
-    println!("  sky-install full-clean             // pull/build/configure all");
+    println!("\nUsage:");
+    println!("\tsky-install get-core    [branch]   \t pull SCAII code");
+    println!("\tsky-install get-sky-rts [branch]   \t pull default RTS");
+    println!("\tsky-install build-core             \t build/configure core");
+    println!("\tsky-install build-sky-rts          \t build/configure default RTS");
+    println!("\tsky-install clean-core-all         \t remove core pull and build artifacts");
+    println!("\tsky-install clean-core-build       \t remove core build artifacts");
+    println!("\tsky-install clean-sky-rts-all      \t remove RTS pull and build artifacts");
+    println!("\tsky-install clean-sky-rts-build    \t remove RTS build artifacts");
+    println!("\tsky-install full-install [branch]  \t pull/build/configure all");
+    println!("\tsky-install full-clean             \t clean all");
+    println!("\tsky-install re-install   [branch]  \t shallow clean/build/configure all (faster than full-install)");
     println!("");
     println!("via cargo...");
     println!("  cargo build -- <command> [branch]");
@@ -94,6 +95,21 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
             try_clean_sky_rts_all(install_dir.clone())?;
             get_core(install_dir.clone(), &args)?;
             get_sky_rts(install_dir.clone(), &args)?;
+            build_core(&install_dir)?;
+            build_sky_rts(install_dir.clone())?;
+            Ok(())
+        }
+        "re-install" => {         
+            if !(install_dir.exists()){
+                println!("Previous installation not found. Please run with argument 
+                    \n\t> full-install [branch]");
+                std::process::exit(0);
+            }else{
+                println!("Previous compile exists. Skipping clean re-compile.
+                     \nIf you want to perform a fresh install please run with argumet 
+                     \n\t> full-install [branch]");
+                shallow_clean();
+            }
             build_core(&install_dir)?;
             build_sky_rts(install_dir.clone())?;
             Ok(())
@@ -341,6 +357,33 @@ fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 
+fn shallow_clean() -> Result<(), Box<Error>> {
+    let mut dir = get_dot_scaii_dir()?;
+    
+    dir.push("backends".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+    }
+    dir.pop();
+
+    dir.push("bin".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+    }
+    dir.pop();
+
+    dir.push("glue".to_string());
+    if dir.as_path().exists() {
+        remove_tree(&dir)?;
+        println!("..Shallow clean :: removed {:?}", dir);
+        
+    }
+    dir.pop();
+    Ok(())
+}  
+
 fn get_home_dir() -> Result<PathBuf, Box<Error>> {
     use error::InstallError;
 
@@ -449,16 +492,24 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     dest.push("sky_rts");
     copy_recursive(source, &dest)?;
 
-    // cp backend/lua/tower_example.lua ~/.scaii/backends/sky-rts/maps
+    // cp backend/lua/* ~/.scaii/backends/sky-rts/maps
     let mut source = backend.clone();
     source.push("lua".to_string());
-    source.push("tower_example.lua".to_string());
+    
+    if cfg!(target_os = "windows") {
+        source.push("*".to_string()); 
+    }else {
+        source.push(".".to_string());
+    }
+
     let mut dest = get_dot_scaii_dir()?;
     dest.push("backends".to_string());
     dest.push("sky-rts".to_string());
     dest.push("maps".to_string());
-    dest.push("tower_example.lua".to_string());
-    common::copy_file(&source, &dest)?;
+    //dest.push("tower_example.lua".to_string());
+
+    copy_recursive(source, &dest)?;
+
     // export PYTHONPATH=$PYTHONPATH:/home/lamki/.scaii/bin:/home/lamki/.scaii/glue/python/
     // export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lamki/.scaii/bin/
     env::set_current_dir(orig_dir_pathbuf.as_path())?;

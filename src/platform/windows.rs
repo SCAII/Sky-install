@@ -86,12 +86,22 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
 
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
-    copy_source_named(source_dir, target, "scaii_core.dll".to_string())
+    copy_source_named(
+        source_dir,
+        target,
+        "scaii_core.dll".to_string(),
+        "scaii_core.dll".to_string(),
+    )
 }
 
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
-    copy_source_named(source_dir, target, "backend.dll".to_string())
+    copy_source_named(
+        source_dir,
+        target,
+        "backend.dll".to_string(),
+        "sky-rts.dll".to_string(),
+    )
 }
 
 pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
@@ -101,6 +111,7 @@ pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Resul
     args.push(source.as_path().to_str().unwrap().to_string());
     args.push("/i".to_string());
     args.push("/s".to_string());
+    args.push("/Y".to_string());
     args.push(dest.as_ref().to_str().unwrap().to_string());
     let _result_string = run_command(&protoc_hack(command), args)?;
     Ok(())

@@ -154,12 +154,13 @@ pub fn copy_source_named(
     source_dir: PathBuf,
     target_dir: PathBuf,
     source_filename: String,
+    dest_filename: String,
 ) -> Result<(), Box<Error>> {
     let mut source: PathBuf = source_dir;
-    source.push(source_filename.clone());
+    source.push(source_filename);
     let mut target: PathBuf = target_dir;
-    target.push(source_filename);
-    copy_file(&source, target)?;
+    target.push(dest_filename);
+    copy_file(&source, &target)?;
     Ok(())
 }
 

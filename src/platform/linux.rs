@@ -5,14 +5,25 @@ use std::path::{Path, PathBuf};
 
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
-    //cp target/release/libscaii_core.so ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libbackend.so".to_string())
+    use std::fs;
+    // rename libbackend.so to libsky-rts.source
+    common::copy_source_named(
+        source_dir,
+        target,
+        "libbackend.so".to_string(),
+        "libsky-rts.so".to_string(),
+    )
 }
 
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     use platform::common;
     //cp target/release/libscaii_core.so ~/.scaii/bin/
-    common::copy_source_named(source_dir, target, "libscaii_core.so".to_string())
+    common::copy_source_named(
+        source_dir,
+        target,
+        "libscaii_core.so".to_string(),
+        "libscaii_core.so".to_string(),
+    )
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
@@ -20,14 +31,10 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     use error::InstallError;
     use platform::common;
 
-    let mut c = Command::new("sh");
-    let c = c.arg("-c");
-    let c = c.arg("\"");
-    let c = c.arg(command);
-    for arg in args.iter() {
+    let mut c = Command::new(command);
+    for arg in args {
         c.arg(arg);
     }
-    let c = c.arg("\"");
     println!("...running command {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
