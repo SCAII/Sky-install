@@ -18,6 +18,7 @@ use platform::*;
 pub struct Args {
     flag_branch: bool,
     arg_branch_name: String,
+    compile_type: String,
 }
 
 fn main() {
