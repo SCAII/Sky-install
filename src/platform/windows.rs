@@ -9,7 +9,7 @@ use platform::common::*;
 // fs::remove_dir_all has issues in windows, so need to shell out
 pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
     //rmdir c:\test /s /q
-    println!("...removing {:?}", dir);
+    println!("removing {:?}", dir);
     let command: String = "rmdir".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push(dir.as_ref().to_str().unwrap().to_string());
@@ -30,13 +30,11 @@ pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
 pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
     use std::env;
     use platform::common;
-
-    println!("");
-    println!("");
+    
     println!("installing core...");
-    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
-    println!("...cd {:?}", orig_dir_pathbuf);
+    
+    println!("{:?}", orig_dir_pathbuf);
     env::set_current_dir(&install_dir)?;
     let command: String = "git".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -47,7 +45,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     let mut scaii_dir = install_dir;
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
-        println!("...cd {:?}", scaii_dir);
+        println!("{:?}", scaii_dir);
         env::set_current_dir(scaii_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
@@ -60,12 +58,10 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
 pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
     use std::env;
 
-    println!("");
-    println!("");
     println!("installing Sky-RTS...");
-    println!("");
+
     let orig_dir_pathbuf = env::current_dir()?;
-    println!("...cd {:?}", orig_dir_pathbuf);
+    println!("{:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.clone())?;
     let command: String = "git".to_string();
     let mut args: Vec<String> = Vec::new();
@@ -76,7 +72,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     if command_args.flag_branch {
         let mut sky_rts_dir = install_dir.clone();
         sky_rts_dir.push("Sky-RTS".to_string());
-        println!("...cd {:?}", sky_rts_dir);
+        println!("{:?}", sky_rts_dir);
         env::set_current_dir(sky_rts_dir)?;
         checkout(command_args.arg_branch_name.clone())?;
     }
@@ -94,6 +90,8 @@ pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<E
     )
 }
 
+/*
+//TO_DELETE
 pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
     copy_source_named(
@@ -103,9 +101,10 @@ pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Er
         "sky-rts.dll".to_string(),
     )
 }
+*/
 
 pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
-    println!("...copying files from {:?} to {:?}", source, dest);
+    println!("copy {:?} to {:?}", source, dest);
     let command: String = "xcopy".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push(source.as_path().to_str().unwrap().to_string());
@@ -128,7 +127,7 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     for arg in args.iter() {
         c.arg(arg);
     }
-    println!("...running command {:?}", c);
+    println!("running {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
         .expect(&String::as_str(&format!(
