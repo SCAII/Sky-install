@@ -432,7 +432,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     dir.push("python".to_string());
     dir.push("scaii".to_string());
     dir.push("env".to_string());
-    dir.push("sky_rts".to_string());
+    //dir.push("sky_rts".to_string());
     common::ensure_dir_exists(&dir)?;
 
     // # Part B, Build  Sky-RTS
@@ -449,7 +449,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     source.push("sky-rts".to_string());
     source.push("glue".to_string());
     source.push("python".to_string());
-    source.push("sky_rts".to_string());
+    //source.push("sky_rts".to_string());
    
     source.push(".".to_string()); 
     
@@ -458,6 +458,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     dest.push("python");
     dest.push("scaii");
     dest.push("env");
+    //source.push("sky_rts".to_string());
     copy_recursive(source, &dest)?;
 
     // cp backend/lua/* ~/.scaii/backends/sky-rts/maps
