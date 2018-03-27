@@ -43,8 +43,8 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     for arg in args.iter() {
         c.arg(arg);
     }
-    println!("...in dir...{:?}", env::current_dir());
-    println!("...running command {:?}", c);
+    println!("{:?}", env::current_dir());
+    println!("running {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
         .expect(&String::as_str(&format!(

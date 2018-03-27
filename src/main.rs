@@ -48,7 +48,7 @@ fn usage() {
                         Sky-RTS and compiles release version.
                         Defaults to dev branch if not
                         specified.
-        reinstall      Quickly recompiles and reinstalls
+        reinstall       Quickly recompiles and reinstalls
                         Sky-RTS without fetching the latest
                         version from Github.
         uninstall       Uninstalls Sky-Rts.
@@ -109,6 +109,7 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
         "uninstall" => {
             try_clean_core_all(install_dir.clone())?;
             try_clean_sky_rts_all(install_dir)?;
+            shallow_clean();
             Ok(())
         }
         _ => {

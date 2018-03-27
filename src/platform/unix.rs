@@ -20,7 +20,7 @@ pub use os_specific::*;
 use os_specific::{run_command, copy_built_core};
 
 pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
-    println!("...removing {:?}", dir);
+    println!("removing {:?}", dir);
     let command: String = "rm".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-rf".to_string());
@@ -39,12 +39,9 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     use std::env;
     use self::git2::Repository;
 
-    println!("");
-    println!("");
     println!("installing core...");
-    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
-    println!("...cd {:?}", orig_dir_pathbuf);
+    println!("{:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.clone())?;
 
     let command: String = "git".to_string();
@@ -62,7 +59,7 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     let mut scaii_dir = install_dir.clone();
     scaii_dir.push("SCAII".to_string());
     if command_args.flag_branch {
-        println!("...cd {:?}", scaii_dir);
+        println!("{:?}", scaii_dir);
         env::set_current_dir(scaii_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
@@ -76,12 +73,9 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     use std::env;
     use self::git2::Repository;
 
-    println!("");
-    println!("");
     println!("installing Sky-RTS...");
-    println!("");
     let orig_dir_pathbuf = env::current_dir()?;
-    println!("...cd {:?}", orig_dir_pathbuf);
+    println!("{:?}", orig_dir_pathbuf);
     env::set_current_dir(install_dir.clone())?;
 
     let command: String = "git".to_string();
@@ -99,7 +93,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
     if command_args.flag_branch {
         let mut sky_rts_dir = install_dir.clone();
         sky_rts_dir.push("Sky-RTS".to_string());
-        println!("...cd {:?}", sky_rts_dir);
+        println!("{:?}", sky_rts_dir);
         env::set_current_dir(sky_rts_dir.clone())?;
         checkout(command_args.arg_branch_name.clone())?;
     }
@@ -108,7 +102,7 @@ pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<
 }
 
 pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
-    println!("...copying files from {:?} to {:?}", source, dest);
+    println!("copying {:?} to {:?}", source, dest);
     let command: String = "cp".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("-a".to_string());

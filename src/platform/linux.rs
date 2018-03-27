@@ -35,7 +35,7 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     for arg in args {
         c.arg(arg);
     }
-    println!("...running command {:?}", c);
+    println!("running {:?}", c);
     let output = c.stdout(Stdio::inherit())
         .output()
         .expect(&format!("failed to launch command {}", command));
