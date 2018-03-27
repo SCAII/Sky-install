@@ -22,14 +22,6 @@ pub struct Args {
 
 fn usage() {
     println!("\nUsage:");
-    println!("\tsky-install get-core    [branch]   \t pull SCAII code");
-    println!("\tsky-install get-sky-rts [branch]   \t pull default RTS");
-    println!("\tsky-install build-core             \t build/configure core");
-    println!("\tsky-install build-sky-rts          \t build/configure default RTS");
-    println!("\tsky-install clean-core-all         \t remove core pull and build artifacts");
-    println!("\tsky-install clean-core-build       \t remove core build artifacts");
-    println!("\tsky-install clean-sky-rts-all      \t remove RTS pull and build artifacts");
-    println!("\tsky-install clean-sky-rts-build    \t remove RTS build artifacts");
     println!("\tsky-install full-install [branch]  \t pull/build/configure all");
     println!("\tsky-install full-clean             \t clean all");
     println!("\tsky-install re-install   [branch]  \t shallow clean/build/configure all (faster than full-install)");
@@ -94,7 +86,7 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
             try_clean_core_all(install_dir.clone())?;
             try_clean_sky_rts_all(install_dir.clone())?;
             get_core(install_dir.clone(), &args)?;
-            get_sky_rts(install_dir.clone(), &args)?;
+           // get_sky_rts(install_dir.clone(), &args)?;
             build_core(&install_dir)?;
             build_sky_rts(install_dir.clone())?;
             Ok(())
@@ -399,13 +391,13 @@ fn get_home_dir() -> Result<PathBuf, Box<Error>> {
 fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     use error::InstallError;
     use platform::common;
-
+    
     println!("");
     println!("");
     println!("building sky-rts...");
     println!("");
     let mut sky_rts_dir = install_dir;
-    sky_rts_dir.push("Sky-RTS");
+    sky_rts_dir.push("SCAII");
     if !sky_rts_dir.as_path().exists() {
         return Err(Box::new(InstallError::new(
             "Sky-RTS has not been installed - run 'get-sky-rts' command first.".to_string(),
@@ -447,66 +439,38 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     // cd ../Sky-RTS/
     // cd backend/
     let mut backend = sky_rts_dir.clone();
-    backend.push("backend".to_string());
+    backend.push("backends".to_string());
     println!("...cd {:?}", backend);
     env::set_current_dir(backend.as_path())?;
 
-    //cargo build --release
-    let command: String = "cargo".to_string();
-    let mut args: Vec<String> = Vec::new();
-    args.push("build".to_string());
-    args.push("--release".to_string());
-    let build_output = run_command(&command, args)?;
-    if build_output.contains("error") {
-        return Err(Box::new(InstallError::new(format!(
-            "ERROR - cargo build failed {:?}",
-            build_output
-        ))));
-    }
-
-    // cp target/release/libbackend.so ~/.scaii/backends/bin/libsky-rts.so
-    let mut source = backend.clone();
-    source.push("target".to_string());
-    source.push("release".to_string());
-
-    let mut dest = get_dot_scaii_dir()?;
-    dest.push("backends".to_string());
-    dest.push("bin".to_string());
-    copy_built_rts(source, dest)?;
-
     // cp -r game_wrapper/python/* ~/.scaii/glue/python/scaii/env/sky_rts/
     let mut source = sky_rts_dir.clone();
-    source.push("game_wrapper".to_string());
+    source.push("backends".to_string());
+    source.push("sky-rts".to_string());
+    source.push("glue".to_string());
     source.push("python".to_string());
-
-    if cfg!(target_os = "windows") {
-        source.push("*".to_string()); 
-    }else {
-        source.push(".".to_string());
-    }
+    source.push("sky_rts".to_string());
+   
+    source.push(".".to_string()); 
+    
     let mut dest = get_dot_scaii_dir()?;
     dest.push("glue");
     dest.push("python");
     dest.push("scaii");
     dest.push("env");
-    dest.push("sky_rts");
     copy_recursive(source, &dest)?;
 
     // cp backend/lua/* ~/.scaii/backends/sky-rts/maps
     let mut source = backend.clone();
+    source.push("sky-rts".to_string());
     source.push("lua".to_string());
     
-    if cfg!(target_os = "windows") {
-        source.push("*".to_string()); 
-    }else {
-        source.push(".".to_string());
-    }
+    source.push(".".to_string());
 
     let mut dest = get_dot_scaii_dir()?;
     dest.push("backends".to_string());
     dest.push("sky-rts".to_string());
     dest.push("maps".to_string());
-    //dest.push("tower_example.lua".to_string());
 
     copy_recursive(source, &dest)?;
 
