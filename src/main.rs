@@ -55,8 +55,6 @@ fn usage() {
         uninstall       Uninstalls Sky-Rts.
 
     ");
-    //println!("via cargo...");
-    //println!("  cargo build -- <command> [branch]");
 }
 
 fn parse_args(arguments: &Vec<String>) -> Args {
@@ -65,20 +63,37 @@ fn parse_args(arguments: &Vec<String>) -> Args {
         arg_branch_name: "".to_string(),
         compile_type: "".to_string(),
     };
-    if arguments.len() < 2 {
+    if  arguments.len() > 1{
+        if arguments[1] == "install" {
+            if arguments.len() == 2 {
+                args.flag_branch = true;
+                args.arg_branch_name = "dev".to_string();
+                args.compile_type = "--release".to_string();
+                println!("No branch specified, defaulting to 'dev'");
+            }
+            else if arguments.len() == 3 {
+                args.flag_branch = true;
+                args.arg_branch_name = arguments[2].clone();
+                args.compile_type = "--release".to_string();
+            } else if arguments.len() == 4 {
+                args.flag_branch = true;
+                args.arg_branch_name = arguments[2].clone();
+                if arguments[3] != "debug"{
+                    args.compile_type = format!("--{}", arguments[3].clone().to_string());
+                }
+            }
+        }else if arguments[1] == "reinstall" {
+            if  arguments.len() == 3 {
+                if arguments[2] != "debug"{
+                    args.compile_type = format!("--{}", arguments[2].clone().to_string());
+                }
+            }else{
+                args.compile_type = "--release".to_string();
+            }
+        }else if arguments[1] == "uninstall" {}
+    }else {
         usage();
         std::process::exit(0);
-    } else if arguments.len() > 2 {
-        args.flag_branch = true;
-        args.arg_branch_name = arguments[2].clone();
-    } else if arguments.len() == 2 {
-        args.flag_branch = true;
-        args.arg_branch_name = "dev".to_string();
-        println!("No branch specified, defaulting to 'dev'");
-    } else if arguments.len() == 3 {
-        args.flag_branch = true;
-        args.arg_branch_name = arguments[2].clone();
-        args.compile_type = arguments[3].clone();
     }
     args
 }
@@ -91,7 +106,7 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
         "install" => {
             try_clean_core_all(install_dir.clone())?;
             get_core(install_dir.clone(), &args)?;
-            build_core(&install_dir)?;
+            build_core(&install_dir, args.compile_type)?;
             build_sky_rts(install_dir.clone())?;
             Ok(())
         }
@@ -103,7 +118,7 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
                 println!("Reinstalling Sky-RTS.");
                 shallow_clean();
             }
-            build_core(&install_dir)?;
+            build_core(&install_dir, args.compile_type)?;
             build_sky_rts(install_dir.clone())?;
             Ok(())
         }
@@ -242,7 +257,7 @@ fn get_default_install_dir() -> Result<PathBuf, Box<Error>> {
     Ok(install_dir_pathbuf)
 }
 
-fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
+fn build_core(install_dir: &PathBuf, compile_type: String) -> Result<(), Box<Error>> {
     use error::InstallError;
     use common;
 
@@ -264,7 +279,10 @@ fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     let command: String = "cargo".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("build".to_string());
-    args.push("--release".to_string());
+    if compile_type != ""{
+        args.push(compile_type.clone());
+    }
+
     let build_output = run_command(&command, args)?;
     if build_output.contains("error") {
         return Err(Box::new(InstallError::new(format!(
@@ -283,7 +301,11 @@ fn build_core(install_dir: &PathBuf) -> Result<(), Box<Error>> {
     assert!(scaii_install_dir.ends_with("SCAII"));
     let mut source = scaii_install_dir.clone();
     source.push("target".to_string());
-    source.push("release".to_string());
+    if compile_type != ""{
+        source.push("release".to_string());
+    }else {
+        source.push("debug".to_string());
+    }
     let target = bindir.clone();
     copy_built_core(source, target)?;
 

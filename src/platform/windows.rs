@@ -55,31 +55,6 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
     Ok(())
 }
 
-pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
-    use std::env;
-
-    println!("installing Sky-RTS...");
-
-    let orig_dir_pathbuf = env::current_dir()?;
-    println!("{:?}", orig_dir_pathbuf);
-    env::set_current_dir(install_dir.clone())?;
-    let command: String = "git".to_string();
-    let mut args: Vec<String> = Vec::new();
-    args.push("clone".to_string());
-    args.push("https://github.com/SCAII/Sky-RTS.git".to_string());
-    let result_string = run_command(&command, args)?;
-    verify_git_clone_success(&result_string)?;
-    if command_args.flag_branch {
-        let mut sky_rts_dir = install_dir.clone();
-        sky_rts_dir.push("Sky-RTS".to_string());
-        println!("{:?}", sky_rts_dir);
-        env::set_current_dir(sky_rts_dir)?;
-        checkout(command_args.arg_branch_name.clone())?;
-    }
-    env::set_current_dir(orig_dir_pathbuf)?;
-    Ok(())
-}
-
 pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
     //cp target/release/scaii_core.dll ~/.scaii/bin/
     copy_source_named(
@@ -89,19 +64,6 @@ pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<E
         "scaii_core.dll".to_string(),
     )
 }
-
-/*
-//TO_DELETE
-pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Error>> {
-    //cp target/release/scaii_core.dll ~/.scaii/bin/
-    copy_source_named(
-        source_dir,
-        target,
-        "backend.dll".to_string(),
-        "sky-rts.dll".to_string(),
-    )
-}
-*/
 
 pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Result<(), Box<Error>> {
     println!("copy {:?} to {:?}", source, dest);
