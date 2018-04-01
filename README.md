@@ -26,7 +26,7 @@ SCAII is known to work on Windows 10 and MacOS. Linux should work but has not be
 	1. Install Visual Studio Build Tools
 		- Link: https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017
 	2. Select all options as shown.
-		- ![Alt text](https://github.com/Sky-install/tree/master/images/visual_studio_installer_windows.PNG"oh hai there")
+		- ![Alt text](https://github.com/Sky-install/tree/instructions/images/visual_studio_installer_windows.PNG"oh hai there")
 
 2. Install Rust
 	- Link: https://www.rust-lang.org/en-US/install.html
