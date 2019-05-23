@@ -30,6 +30,7 @@ SCAII RTS works on Windows 10 and MacOS. Linux should work (not tested).
 
 2. Install Rust
 	- Link: https://www.rust-lang.org/en-US/install.html
+	- Command: `rustup default 1.26.2`
 
 3. Install Python 3
 	- Link: https://www.python.org/downloads/
