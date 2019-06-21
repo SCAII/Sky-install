@@ -1,5 +1,6 @@
 extern crate curl;
 extern crate zip;
+extern crate fs_extra;
 
 use std::error::Error;
 use std::env;
@@ -9,7 +10,9 @@ use std::fs;
 pub(crate) mod error;
 
 pub(crate) mod platform;
+
 use platform::*;
+use fs_extra::dir::CopyOptions;
 
 //  install into .scaii/git by default
 //  ___enhancement - user can override location by specifing --here , if build commands don't find under scaii git, then look "here" by default
@@ -63,35 +66,34 @@ fn parse_args(arguments: &Vec<String>) -> Args {
         arg_branch_name: "".to_string(),
         compile_type: "".to_string(),
     };
-    if  arguments.len() > 1{
+    if arguments.len() > 1 {
         if arguments[1] == "install" {
             if arguments.len() == 2 {
                 args.flag_branch = true;
                 args.arg_branch_name = "master".to_string();
                 args.compile_type = "--release".to_string();
                 println!("No branch specified, defaulting to 'master'");
-            }
-            else if arguments.len() == 3 {
+            } else if arguments.len() == 3 {
                 args.flag_branch = true;
                 args.arg_branch_name = arguments[2].clone();
                 args.compile_type = "--release".to_string();
             } else if arguments.len() == 4 {
                 args.flag_branch = true;
                 args.arg_branch_name = arguments[2].clone();
-                if arguments[3] != "debug"{
+                if arguments[3] != "debug" {
                     args.compile_type = format!("--{}", arguments[3].clone().to_string());
                 }
             }
-        }else if arguments[1] == "reinstall" {
-            if  arguments.len() == 3 {
-                if arguments[2] != "debug"{
+        } else if arguments[1] == "reinstall" {
+            if arguments.len() == 3 {
+                if arguments[2] != "debug" {
                     args.compile_type = format!("--{}", arguments[2].clone().to_string());
                 }
-            }else{
+            } else {
                 args.compile_type = "--release".to_string();
             }
-        }else if arguments[1] == "uninstall" {}
-    }else {
+        } else if arguments[1] == "uninstall" {}
+    } else {
         usage();
         std::process::exit(0);
     }
@@ -106,20 +108,22 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
         "install" => {
             try_clean_core_all(install_dir.clone())?;
             get_core(install_dir.clone(), &args)?;
-            build_core(&install_dir, args.compile_type)?;
+            build_core(&install_dir, args.compile_type.clone())?;
             build_sky_rts(install_dir.clone())?;
+            copy_execs(install_dir.clone(), args.compile_type == "--release")?;
             Ok(())
         }
-        "reinstall" => {         
-            if !(install_dir.exists()){
+        "reinstall" => {
+            if !(install_dir.exists()) {
                 println!("ERROR: Installation not found. Nothing to reinstall.");
                 std::process::exit(0);
-            }else{
+            } else {
                 println!("Reinstalling Sky-RTS.");
                 shallow_clean();
             }
-            build_core(&install_dir, args.compile_type)?;
+            build_core(&install_dir, args.compile_type.clone())?;
             build_sky_rts(install_dir.clone())?;
+            copy_execs(install_dir.clone(), args.compile_type == "--release")?;
             Ok(())
         }
         "uninstall" => {
@@ -134,6 +138,28 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
             Ok(())
         }
     }
+}
+
+fn copy_execs(mut install_path: PathBuf, release: bool) -> Result<(), Box<Error>> {
+    // we want the root
+    install_path.pop();
+
+    fs::create_dir_all(install_path.join("bin/core/src/internal/replay/"))?;
+    fs::copy(install_path.join("git/SCAII/core/src/internal/replay/no_cache_webserver.py"),
+             install_path.join("bin/core/src/internal/replay/no_cache_webserver.py")
+    )?;
+
+    let from = vec![
+        install_path.join("git/SCAII/viz"),
+        install_path.join("git/SCAII/cfg.toml"),
+        if release { install_path.join("git/SCAII/target/release/replay.exe") } else { install_path.join("git/SCAII/target/debug/replay.exe") },
+    ];
+
+
+    let to = install_path.join("bin");
+    let opts = fs_extra::dir::CopyOptions { overwrite: true, skip_exist: false, buffer_size: 6400, copy_inside: true, depth: 0 };
+    fs_extra::copy_items(&from, to, &opts)?;
+    Ok(())
 }
 
 fn try_clean_core_all(install_dir: PathBuf) -> Result<(), Box<Error>> {
@@ -279,7 +305,7 @@ fn build_core(install_dir: &PathBuf, compile_type: String) -> Result<(), Box<Err
     let command: String = "cargo".to_string();
     let mut args: Vec<String> = Vec::new();
     args.push("build".to_string());
-    if compile_type != ""{
+    if compile_type != "" {
         args.push(compile_type.clone());
     }
 
@@ -301,9 +327,9 @@ fn build_core(install_dir: &PathBuf, compile_type: String) -> Result<(), Box<Err
     assert!(scaii_install_dir.ends_with("SCAII"));
     let mut source = scaii_install_dir.clone();
     source.push("target".to_string());
-    if compile_type != ""{
+    if compile_type != "" {
         source.push("release".to_string());
-    }else {
+    } else {
         source.push("debug".to_string());
     }
     let target = bindir.clone();
@@ -321,7 +347,7 @@ fn build_core(install_dir: &PathBuf, compile_type: String) -> Result<(), Box<Err
 
 fn shallow_clean() -> Result<(), Box<Error>> {
     let mut dir = get_dot_scaii_dir()?;
-    
+
     dir.push("backends".to_string());
     if dir.as_path().exists() {
         remove_tree(&dir)?;
@@ -340,11 +366,10 @@ fn shallow_clean() -> Result<(), Box<Error>> {
     if dir.as_path().exists() {
         remove_tree(&dir)?;
         println!("removed {:?}", dir);
-        
     }
     dir.pop();
     Ok(())
-}  
+}
 
 fn get_home_dir() -> Result<PathBuf, Box<Error>> {
     use error::InstallError;
@@ -416,9 +441,9 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     source.push("glue".to_string());
     source.push("python".to_string());
     //source.push("sky_rts".to_string());
-   
-    source.push(".".to_string()); 
-    
+
+    source.push(".".to_string());
+
     let mut dest = get_dot_scaii_dir()?;
     dest.push("glue");
     dest.push("python");
@@ -430,7 +455,7 @@ fn build_sky_rts(install_dir: PathBuf) -> Result<(), Box<Error>> {
     let mut source = backend.clone();
     source.push("sky-rts".to_string());
     source.push("lua".to_string());
-    
+
     source.push(".".to_string());
 
     let mut dest = get_dot_scaii_dir()?;
