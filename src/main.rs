@@ -144,6 +144,11 @@ fn try_command(command: &String, args: Args) -> Result<(), Box<Error>> {
 }
 
 fn copy_execs(mut install_path: PathBuf, release: bool) -> Result<(), Box<Error>> {
+    #[cfg(target_os = "windows")]
+    const EXTENSION: &'static str = ".exe";
+    #[cfg(not(target_os = "windows"))]
+    const EXTENSION: &'static str = "";
+
     // we want the root
     install_path.pop();
 
@@ -156,11 +161,11 @@ fn copy_execs(mut install_path: PathBuf, release: bool) -> Result<(), Box<Error>
     let from = vec![
         install_path.join("git/SCAII/viz"),
         install_path.join("git/SCAII/cfg.toml"),
-        if release {
-            install_path.join("git/SCAII/target/release/replay.exe")
-        } else {
-            install_path.join("git/SCAII/target/debug/replay.exe")
-        },
+        install_path.join(format!(
+            "git/SCAII/target/{}/replay{}",
+            if release { "release" } else { "debug" },
+            EXTENSION
+        )),
     ];
 
     let to = install_path.join("bin");
