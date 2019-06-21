@@ -29,10 +29,10 @@ pub fn copy_built_rts(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<Er
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
-    use std::process::{Command, Stdio};
     use error::InstallError;
     use platform::common;
     use std::env;
+    use std::process::{Command, Stdio};
 
     // note - using the sh -c approach on Mac caused the chmod command to fail.  Leaving them out
     // let it succeed, so left it that way assuming all commands would be similar.
@@ -45,7 +45,8 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
     }
     println!("{:?}", env::current_dir());
     println!("running {:?}", c);
-    let output = c.stdout(Stdio::inherit())
+    let output = c
+        .stdout(Stdio::inherit())
         .output()
         .expect(&String::as_str(&format!(
             "failed to launch command {}",

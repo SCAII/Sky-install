@@ -27,16 +27,17 @@ pub fn copy_built_core(source_dir: PathBuf, target: PathBuf) -> Result<(), Box<E
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
-    use std::process::{Command, Stdio};
     use error::InstallError;
     use platform::common;
+    use std::process::{Command, Stdio};
 
     let mut c = Command::new(command);
     for arg in args {
         c.arg(arg);
     }
     println!("running {:?}", c);
-    let output = c.stdout(Stdio::inherit())
+    let output = c
+        .stdout(Stdio::inherit())
         .output()
         .expect(&format!("failed to launch command {}", command));
     common::emit_error_output(&output);

@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use error::InstallError;
 use std::error::Error;
 use std::fmt::Debug;
-use error::InstallError;
+use std::path::{Path, PathBuf};
 use Args;
 
 use platform::common::*;
@@ -28,12 +28,12 @@ pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
 // (cmake invocation of cl.exe uses forward slashes for path - likely explanation for dll adjacent to cl.exe
 //  not being found)
 pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
-    use std::env;
     use platform::common;
-    
+    use std::env;
+
     println!("installing core...");
     let orig_dir_pathbuf = env::current_dir()?;
-    
+
     println!("{:?}", orig_dir_pathbuf);
     env::set_current_dir(&install_dir)?;
     let command: String = "git".to_string();
@@ -79,9 +79,9 @@ pub fn copy_recursive<P: AsRef<Path> + Debug>(source: PathBuf, dest: P) -> Resul
 }
 
 pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error>> {
-    use std::process::{Command, Stdio};
     use error::InstallError;
     use platform::common;
+    use std::process::{Command, Stdio};
 
     let mut c = Command::new("cmd");
     let c = c.arg("/C");
@@ -90,7 +90,8 @@ pub fn run_command(command: &str, args: Vec<String>) -> Result<String, Box<Error
         c.arg(arg);
     }
     println!("running {:?}", c);
-    let output = c.stdout(Stdio::inherit())
+    let output = c
+        .stdout(Stdio::inherit())
         .output()
         .expect(&String::as_str(&format!(
             "failed to launch command {}",

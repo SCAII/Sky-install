@@ -1,18 +1,18 @@
 extern crate curl;
-extern crate zip;
 extern crate fs_extra;
+extern crate zip;
 
-use std::error::Error;
 use std::env;
-use std::path::PathBuf;
+use std::error::Error;
 use std::fs;
+use std::path::PathBuf;
 
 pub(crate) mod error;
 
 pub(crate) mod platform;
 
-use platform::*;
 use fs_extra::dir::CopyOptions;
+use platform::*;
 
 //  install into .scaii/git by default
 //  ___enhancement - user can override location by specifing --here , if build commands don't find under scaii git, then look "here" by default
@@ -39,7 +39,8 @@ fn main() {
 }
 
 fn usage() {
-    println!("
+    println!(
+        "
     Sky-Install.
     
     Usage:
@@ -57,7 +58,8 @@ fn usage() {
                         version from Github.
         uninstall       Uninstalls Sky-Rts.
 
-    ");
+    "
+    );
 }
 
 fn parse_args(arguments: &Vec<String>) -> Args {
@@ -92,7 +94,8 @@ fn parse_args(arguments: &Vec<String>) -> Args {
             } else {
                 args.compile_type = "--release".to_string();
             }
-        } else if arguments[1] == "uninstall" {}
+        } else if arguments[1] == "uninstall" {
+        }
     } else {
         usage();
         std::process::exit(0);
@@ -145,19 +148,29 @@ fn copy_execs(mut install_path: PathBuf, release: bool) -> Result<(), Box<Error>
     install_path.pop();
 
     fs::create_dir_all(install_path.join("bin/core/src/internal/replay/"))?;
-    fs::copy(install_path.join("git/SCAII/core/src/internal/replay/no_cache_webserver.py"),
-             install_path.join("bin/core/src/internal/replay/no_cache_webserver.py")
+    fs::copy(
+        install_path.join("git/SCAII/core/src/internal/replay/no_cache_webserver.py"),
+        install_path.join("bin/core/src/internal/replay/no_cache_webserver.py"),
     )?;
 
     let from = vec![
         install_path.join("git/SCAII/viz"),
         install_path.join("git/SCAII/cfg.toml"),
-        if release { install_path.join("git/SCAII/target/release/replay.exe") } else { install_path.join("git/SCAII/target/debug/replay.exe") },
+        if release {
+            install_path.join("git/SCAII/target/release/replay.exe")
+        } else {
+            install_path.join("git/SCAII/target/debug/replay.exe")
+        },
     ];
 
-
     let to = install_path.join("bin");
-    let opts = fs_extra::dir::CopyOptions { overwrite: true, skip_exist: false, buffer_size: 6400, copy_inside: true, depth: 0 };
+    let opts = fs_extra::dir::CopyOptions {
+        overwrite: true,
+        skip_exist: false,
+        buffer_size: 6400,
+        copy_inside: true,
+        depth: 0,
+    };
     fs_extra::copy_items(&from, to, &opts)?;
     Ok(())
 }
@@ -284,8 +297,8 @@ fn get_default_install_dir() -> Result<PathBuf, Box<Error>> {
 }
 
 fn build_core(install_dir: &PathBuf, compile_type: String) -> Result<(), Box<Error>> {
-    use error::InstallError;
     use common;
+    use error::InstallError;
 
     println!("\nbuilding SCAII");
     println!("");

@@ -1,6 +1,6 @@
 use std::error::Error;
-use std::path::{Path, PathBuf};
 use std::fs::File;
+use std::path::{Path, PathBuf};
 use std::process::Output;
 
 pub fn verify_git_clone_success(result_string: &str) -> Result<(), Box<Error>> {
@@ -185,8 +185,8 @@ pub fn copy_file<P1: AsRef<Path>, P2: AsRef<Path>>(source: P1, dest: P2) -> Resu
 
 fn download_using_curl(url: &String, target_path: &PathBuf) -> Result<(), Box<Error>> {
     use curl::easy::{Easy2, Handler, WriteError};
-    use std::io::Write;
     use std::fs;
+    use std::io::Write;
 
     struct Collector(Vec<u8>);
 
@@ -226,9 +226,9 @@ fn append_relative_path(mut path_buf: PathBuf, subdir: &str) -> PathBuf {
 }
 
 fn unzip_file(parent: &PathBuf, zip_file: File) -> Result<(), Box<Error>> {
+    use std::fs;
     use std::io::{Read, Write};
     use zip;
-    use std::fs;
 
     let mut zip = try!(zip::ZipArchive::new(&zip_file));
     println!(
@@ -287,8 +287,8 @@ fn ensure_subdir_exists(mut path_buf: PathBuf, subdir: &str) -> Result<(), Box<E
 }
 
 pub fn install_protobuf_javascript_lib(install_dir: PathBuf) -> Result<(), Box<Error>> {
-    use std::env;
     use platform;
+    use std::env;
 
     println!("...installing google protobuf javascript library...");
     let orig_dir_pathbuf = env::current_dir()?;

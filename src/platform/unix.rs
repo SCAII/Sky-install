@@ -1,9 +1,9 @@
 extern crate git2;
 
-use std::path::{Path, PathBuf};
+use error::InstallError;
 use std::error::Error;
 use std::fmt::Debug;
-use error::InstallError;
+use std::path::{Path, PathBuf};
 use Args;
 
 use platform::common::*;
@@ -17,7 +17,7 @@ pub mod os_specific;
 pub mod os_specific;
 
 pub use os_specific::*;
-use os_specific::{run_command, copy_built_core};
+use os_specific::{copy_built_core, run_command};
 
 pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
     println!("removing {:?}", dir);
@@ -36,8 +36,8 @@ pub fn remove_tree<P: AsRef<Path> + Debug>(dir: P) -> Result<(), Box<Error>> {
 }
 
 pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
-    use std::env;
     use self::git2::Repository;
+    use std::env;
 
     println!("installing core...");
     let orig_dir_pathbuf = env::current_dir()?;
@@ -70,8 +70,8 @@ pub fn get_core(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Err
 }
 
 pub fn get_sky_rts(install_dir: PathBuf, command_args: &Args) -> Result<(), Box<Error>> {
-    use std::env;
     use self::git2::Repository;
+    use std::env;
 
     println!("installing Sky-RTS...");
     let orig_dir_pathbuf = env::current_dir()?;
