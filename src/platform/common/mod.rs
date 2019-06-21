@@ -114,14 +114,14 @@ pub fn install_google_closure_library(
                 ))))
             } else {
                 println!("...unzipping");
-                let f = fs::File::open(closure_zip_path)?;
+                let f = fs::File::open(&closure_zip_path)?;
                 unzip_file(&closure_install_dir, f)?;
                 let mut closure_temp_dir_name = closure_install_dir.clone();
                 closure_temp_dir_name.push(&orig_unzipped_dir_name);
 
                 closure_install_dir.push("closure-library");
                 let rename_result = fs::rename(&orig_unzipped_dir_name, &closure_install_dir);
-                match rename_result {
+                let result = match rename_result {
                     Ok(_) => {
                         if closure_install_dir.exists() {
                             Ok(closure_install_dir)
@@ -139,7 +139,9 @@ pub fn install_google_closure_library(
                             closure_temp_dir_name, closure_install_dir
                         ))))
                     }
-                }
+                }?;
+                fs::remove_file(closure_zip_path)?;
+                Ok(result)
             }
         }
         Err(error) => Err(Box::new(InstallError::new(format!(
