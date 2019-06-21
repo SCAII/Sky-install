@@ -67,9 +67,9 @@ fn parse_args(arguments: &Vec<String>) -> Args {
         if arguments[1] == "install" {
             if arguments.len() == 2 {
                 args.flag_branch = true;
-                args.arg_branch_name = "dev".to_string();
+                args.arg_branch_name = "master".to_string();
                 args.compile_type = "--release".to_string();
-                println!("No branch specified, defaulting to 'dev'");
+                println!("No branch specified, defaulting to 'master'");
             }
             else if arguments.len() == 3 {
                 args.flag_branch = true;
